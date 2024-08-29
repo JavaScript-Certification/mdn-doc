@@ -1,0 +1,50 @@
+# This workflow exclusively and specifically only checks the
+# kumascript test suite.
+# But if a package gets upgraded (e.g. Dependabot making a PR)
+# that should test the kumascript suite too because the packages
+# might have (and we've seen it happen!) an impact on the suite.
+
+# Note that lint checking and stuff for files with `kumascript/**`
+# is done with the general testing workflow.
+
+name: Kumascript unit testing
+
+on:
+  pull_request:
+    paths:
+      - kumascript/**
+      - .github/workflows/pr-kumascript.yml
+      - jest.config.json
+      - package.json
+      - yarn.lock
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node.js environment
+        uses: actions/setup-node@v4
+        with:
+          node-version-file: ".nvmrc"
+          cache: yarn
+
+      - name: Cache @vscode/ripgrep bin
+        uses: actions/cache@v4
+        with:
+          key: vscode-ripgrep-bin-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles('yarn.lock') }}
+          path: node_modules/@vscode/ripgrep/bin/
+
+      - name: Install all yarn packages
+        run: yarn --frozen-lockfile
+        env:
+          # https://github.com/microsoft/vscode-ripgrep#github-api-limit-note
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Unit testing kumascript
+        env:
+          CONTENT_ROOT: testing/content/files
+        run: |
+          yarn test:kumascript

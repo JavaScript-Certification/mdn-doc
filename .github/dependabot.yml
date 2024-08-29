@@ -1,0 +1,88 @@
+version: 2
+
+updates:
+  - package-ecosystem: npm
+    directory: "/"
+    schedule:
+      interval: daily
+    open-pull-requests-limit: 35
+    groups:
+      sentry:
+        patterns:
+          - "@sentry/*"
+      types:
+        patterns:
+          - "@types/*"
+        update-types:
+          - "minor"
+          - "patch"
+    ignore:
+      # Temporarily disable updates to Dinocons
+      - dependency-name: "@mdn/dinocons"
+
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "daily"
+
+  - package-ecosystem: "pip"
+    directory: "/deployer"
+    schedule:
+      interval: "weekly"
+    groups:
+      dependencies:
+        patterns:
+          - "*"
+        update-types:
+          - "minor"
+          - "patch"
+
+  - package-ecosystem: "pip"
+    directory: "/testing/integration"
+    schedule:
+      interval: "weekly"
+    groups:
+      dependencies:
+        patterns:
+          - "*"
+        update-types:
+          - "minor"
+          - "patch"
+
+  - package-ecosystem: npm
+    directory: "/client/pwa"
+    schedule:
+      interval: daily
+    open-pull-requests-limit: 10
+
+  - package-ecosystem: npm
+    directory: "/cloud-function"
+    schedule:
+      interval: daily
+    open-pull-requests-limit: 10
+
+  - package-ecosystem: npm
+    directory: "/lib/locale-utils"
+    schedule:
+      interval: daily
+    open-pull-requests-limit: 10
+
+  - package-ecosystem: npm
+    directory: "/lib/pong"
+    schedule:
+      interval: daily
+    open-pull-requests-limit: 10
+
+  - package-ecosystem: npm
+    directory: "/lib/slug-utils"
+    schedule:
+      interval: daily
+    open-pull-requests-limit: 10
+
+    # This forces the Dependabot commit messages to conform to something
+    # our auto-merge workflow can always cope with.
+    # See https://github.com/ahmadnassri/action-dependabot-auto-merge/issues/31#issuecomment-718779806
+    commit-message:
+      prefix: build
+      prefix-development: chore
+      include: scope

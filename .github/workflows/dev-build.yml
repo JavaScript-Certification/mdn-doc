@@ -1,0 +1,237 @@
+name: Dev Build
+
+# NOTE! This is the *DEV* workflow.
+# Keep in mind that much of the configuration is repeated in `prod-build.yml`
+# and `stage-build.yml`
+#
+# For a complete picture of all environments, see:
+#
+#  https://docs.google.com/spreadsheets/d/1VnnEl-iTtKYmlyN02FiEXygxZCgE4o_ZO8wSleebne4/edit?usp=sharing
+#
+
+# NOTE! Unlike prod and stage, this work only works on manual dispatch
+on:
+  workflow_dispatch:
+    inputs:
+      notes:
+        description: "Notes"
+        required: false
+        default: ""
+
+      # This is very useful when combined with the "Use workflow from"
+      # feature that is built into the "Run workflow" button on
+      # https://github.com/mdn/yari/actions?query=workflow%3A%22Production+Build%22
+      # If you override the deployment prefix to something like the name
+      # of the branch, you can deploy that entire branch to its own prefix
+      # in S3 which means that it can be fully hosted as its own site.
+      deployment_prefix:
+        description: "Deployment prefix"
+        required: false
+        default: "main"
+
+      log_each_successful_upload:
+        description: "Deployer logs each success"
+        required: false
+        default: "false"
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/checkout@v4
+        with:
+          repository: mdn/content
+          path: mdn/content
+          # Yes, this means fetch EVERY COMMIT EVER.
+          # It's probably not sustainable in the far future (e.g. past 2021)
+          # but for now it's good enough. We'll need all the history
+          # so we can figure out each document's last-modified date.
+          fetch-depth: 0
+
+      - uses: actions/checkout@v4
+        with:
+          repository: mdn/translated-content
+          path: mdn/translated-content
+          # See matching warning for mdn/content checkout step
+          fetch-depth: 0
+
+      - uses: actions/checkout@v4
+        with:
+          repository: mdn/mdn-contributor-spotlight
+          path: mdn/mdn-contributor-spotlight
+
+      - name: Setup Node.js environment
+        uses: actions/setup-node@v4
+        with:
+          node-version-file: ".nvmrc"
+          cache: yarn
+
+      - name: Install all yarn packages
+        run: yarn --frozen-lockfile
+        env:
+          # https://github.com/microsoft/vscode-ripgrep#github-api-limit-note
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Install Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.10"
+
+      - name: Install Python poetry
+        uses: snok/install-poetry@v1
+
+      - name: Install deployer
+        run: |
+          cd deployer
+          poetry install
+
+      - name: Display Python & Poetry version
+        run: |
+          python --version
+          poetry --version
+
+      - name: Print information about build
+        run: |
+          echo "notes: ${{ github.event.inputs.notes }}"
+          echo "log_each_successful_upload: ${{ github.event.inputs.log_each_successful_upload }}"
+          echo "deployment_prefix: ${{ github.event.inputs.deployment_prefix }}"
+
+      - name: Print information about CPU
+        run: cat /proc/cpuinfo
+
+      - name: Build everything
+        env:
+          # Remember, the mdn/content repo got cloned into `pwd` into a
+          # sub-folder called "mdn/content"
+          CONTENT_ROOT: ${{ github.workspace }}/mdn/content/files
+          CONTENT_TRANSLATED_ROOT: ${{ github.workspace }}/mdn/translated-content/files
+          CONTRIBUTOR_SPOTLIGHT_ROOT: ${{ github.workspace }}/mdn/mdn-contributor-spotlight/contributors
+
+          # This basically means that all live-sample iframes run on the same
+          # host as the page that includes the iframe. Not great security but the
+          # context is that this is Dev and it's not connected to a real backend.
+          BUILD_LIVE_SAMPLES_BASE_URL: ""
+
+          # Now is not the time to worry about flaws.
+          BUILD_FLAW_LEVELS: "*:ignore"
+
+          # Uncomment when hacking on this workflow. It means the `yarn build`
+          # finishes much sooner, which can be helpful debugging the other stuff
+          # the workflow needs to do.
+          # BUILD_FOLDERSEARCH: web/html
+
+          # This just makes sure the Google Analytics script gets used even if
+          # it goes nowhere.
+          BUILD_GOOGLE_ANALYTICS_MEASUREMENT_ID: G-XXXXXXXX
+
+          # This removes the ability to sign in
+          REACT_APP_DISABLE_AUTH: true
+
+        run: |
+          set -eo pipefail
+
+          # Info about which CONTENT_* environment variables were set and to what.
+          echo "CONTENT_ROOT=$CONTENT_ROOT"
+          echo "CONTENT_TRANSLATED_ROOT=$CONTENT_TRANSLATED_ROOT"
+          yarn build:prepare
+
+          yarn tool sync-translated-content
+
+          # Spread the work across 2 processes. Why 2? Because that's what you
+          # get in the default GitHub hosting Linux runners.
+          # See https://docs.github.com/en/actions/using-github-hosted-runners/about-github-hosted-runners#supported-runners-and-hardware-resources
+          yarn build:docs --locale     en-us --locale     ja --locale     fr &
+          build1=$!
+          yarn build:docs --not-locale en-us --not-locale ja --not-locale fr &
+          build2=$!
+
+          # You must explicitly specify the job you're waiting-on to ensure
+          # that the exit status of the wait command reflects the exit status
+          # of the job it's waiting-on.
+          wait $build1
+          wait $build2
+
+          # TODO: When the deployer is available this is where we
+          # would upload the whole content of client/build
+          du -sh client/build
+
+          # Generate sitemap index file
+          yarn build --sitemap-index
+
+          # SSR all pages
+          yarn render:html
+
+          # Generate whatsdeployed files.
+          yarn tool whatsdeployed --output client/build/_whatsdeployed/code.json
+          yarn tool whatsdeployed $CONTENT_ROOT --output client/build/_whatsdeployed/content.json
+          yarn tool whatsdeployed $CONTENT_TRANSLATED_ROOT --output client/build/_whatsdeployed/translated-content.json
+
+      - name: Deploy with deployer
+        env:
+          # Set the CONTENT_ROOT first
+          CONTENT_ROOT: ${{ github.workspace }}/mdn/content/files
+          CONTENT_TRANSLATED_ROOT: ${{ github.workspace }}/mdn/translated-content/files
+
+          DEPLOYER_BUCKET_NAME: mdn-content-dev
+          DEPLOYER_BUCKET_PREFIX: ${{ github.event.inputs.deployment_prefix }}
+          DEPLOYER_LOG_EACH_SUCCESSFUL_UPLOAD: ${{ github.event.inputs.log_each_successful_upload }}
+
+          AWS_ACCESS_KEY_ID: ${{ secrets.DEPLOYER_STAGE_AND_DEV_AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.DEPLOYER_STAGE_AND_DEV_AWS_SECRET_ACCESS_KEY }}
+
+          DEPLOYER_ELASTICSEARCH_URL: ${{ secrets.DEPLOYER_DEV_ELASTICSEARCH_URL }}
+
+        run: |
+          if [ ${{ github.event.inputs.translated_content }} == "true" ]; then
+            echo "Will build mdn/translated-content too"
+            export CONTENT_TRANSLATED_ROOT=${{ github.workspace }}/mdn/translated-content/files
+          else
+            echo "Will NOT build mdn/translated-content too"
+          fi
+
+          # Info about which CONTENT_* environment variables were set and to what.
+          echo "CONTENT_ROOT=$CONTENT_ROOT"
+          echo "CONTENT_TRANSLATED_ROOT=$CONTENT_TRANSLATED_ROOT"
+
+          cd deployer
+
+          # XXX would be nice to validate here that $DEPLOYER_BUCKET_PREFIX is truthy
+          echo "DEPLOYER_BUCKET_PREFIX=$DEPLOYER_BUCKET_PREFIX"
+
+          poetry run deployer upload --prune ../client/build
+          poetry run deployer search-index ../client/build
+
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v4.0.2
+        with:
+          aws-access-key-id: ${{ secrets.DEPLOYER_STAGE_AND_DEV_AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.DEPLOYER_STAGE_AND_DEV_AWS_SECRET_ACCESS_KEY }}
+          aws-region: us-east-1
+
+      - name: Invalidate CDN
+        env:
+          DISTRIBUTION: E9813D0RN1QZI
+          PATHS: /*
+        run: aws cloudfront create-invalidation --distribution-id "$DISTRIBUTION" --paths "$PATHS"
+
+      - name: Notify PRs about deployment
+        run: |
+          gh pr list -S "$GITHUB_SHA -is:merged" --json number --jq '.[].number' | xargs -i gh pr comment {} --body "Dev build for $GITHUB_SHA was deployed to: $DEPLOYMENT_URL" || true
+        env:
+          DEPLOYMENT_URL: https://${{ github.event.inputs.deployment_prefix }}.content.dev.mdn.mozit.cloud/
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Slack Notification
+        if: failure()
+        uses: rtCamp/action-slack-notify@v2
+        env:
+          SLACK_CHANNEL: mdn-notifications
+          SLACK_COLOR: ${{ job.status }}
+          SLACK_ICON: https://avatars.slack-edge.com/2020-11-17/1513880588420_fedd7f0e9456888e69ff_96.png
+          SLACK_TITLE: "Dev"
+          SLACK_MESSAGE: "Build failed :broken_heart:"
+          SLACK_FOOTER: "Powered by dev-build.yml"
+          SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
