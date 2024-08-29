@@ -111,3 +111,4 @@ client/src/.linaria_cache
 ssr/.linaria-cache/
 
 client/venv
+mdn-content/
