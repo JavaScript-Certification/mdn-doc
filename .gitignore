@@ -112,3 +112,5 @@ ssr/.linaria-cache/
 
 client/venv
 mdn-content/
+# Local Netlify folder
+.netlify
