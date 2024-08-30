@@ -32,7 +32,6 @@ yarn-error.log*
 /build/*.js
 /build/*.js.map
 /client/build
-/client/src/**/*.js
 /client/src/**/*.js.map
 /content/*.js
 /content/*.js.map
