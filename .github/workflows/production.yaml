@@ -1,0 +1,44 @@
+name: Netlify Production Deployment
+on:
+  push:
+    branches:
+      - main
+  repository_dispatch:
+    types: [deploy_production]
+env:
+  NETLIFY_AUTH_TOKEN: ${{ secrets.NETLIFY_API_TOKEN }}
+  NETLIFY_SITE_ID: ${{ secrets.NETLIFY_SITE_ID }}
+jobs:
+  Deploy-Production:
+    runs-on: ubuntu-latest
+    environment: Production
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Use Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20.x"
+          cache: "yarn"
+
+      - name: Install Netlify CLI
+        run: yarn global add netlify-cli@17.23
+
+      - name: Link Netlify project
+        run: netlify link
+
+      - name: Install Dependencies
+        run: yarn install --frozen-lockfile
+
+      - name: Clone latest mdn content
+        run: yarn clone-mdn-content
+
+      - name: Build Project
+        run: yarn build:static
+
+      - name: Deploy Project Artifacts to Netlify
+        run: |
+          netlify deploy \
+            --dir ./client/build/ \
+            --prod \
+            --message "Action-${{env.BRANCH_NAME}}-${{github.event.head_commit.message}}"
