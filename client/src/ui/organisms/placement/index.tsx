@@ -89,29 +89,8 @@ export function SidePlacement() {
   );
 }
 
-function TopPlacementFallbackContent() {
-  const gleanClick = useGleanClick();
-
-  return (
-    <p className="fallback-copy">
-      Learn front-end development with high quality, interactive courses from{" "}
-      <a
-        href="https://scrimba.com/learn/frontend?via=mdn"
-        target="_blank"
-        rel="noreferrer"
-        onClick={() => {
-          gleanClick(BANNER_SCRIMBA_CLICK);
-        }}
-      >
-        Scrimba
-      </a>
-      . Enroll now!
-    </p>
-  );
-}
-
 export function TopPlacement() {
-  return null
+  return null;
 }
 
 export function HpMainPlacement() {
