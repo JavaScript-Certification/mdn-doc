@@ -10,7 +10,6 @@ import "./index.scss";
 import { useGleanClick } from "../../../telemetry/glean-context";
 import { Status, usePlacement } from "../../../placement-context";
 import { Payload as PlacementData } from "../../../../../libs/pong/types";
-import { BANNER_SCRIMBA_CLICK } from "../../../telemetry/constants";
 
 interface Timer {
   timeout: number | null;
