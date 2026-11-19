@@ -1,294 +1,202 @@
-# Yari
+# Fred
 
-![Testing](https://github.com/mdn/yari/workflows/Testing%20Yari/badge.svg)
-![Prod Build](https://github.com/mdn/yari/workflows/Prod%20Build/badge.svg)
+MDN's next fr(ont)e(n)d.
 
-## Quickstart
+## Getting started
 
-Development on `yari` involves updating the machinery that renders MDN content
-or improving the structure and styling of the MDN UI (e.g. the styling of the
-header). If you are more interested in contributing to the MDN content, you
-should check out the [content](https://github.com/mdn/content) repo README
-instead.
+1. Copy `.env-dist` to `.env` and update values as needed. The file contains comments for guidance:
 
-Before you can start working with Yari, you need to:
+```bash
+   cp .env-dist .env
+```
 
-<!-- Peterbe, Feb 2021: There appears to be a bug in Prettier for .md files
-    that forces in a second (extra) whitespace after the `1.` here.
-    That breaks `markdownlint` *and* `prettier --check`. Annoying.
-    So for now let's make an exception. -->
-<!-- markdownlint-disable list-marker-space -->
+2. Install dependencies `npm install`
+3. Bring up the dev environment with `npm run start`
 
-1.  Install [git](https://git-scm.com/), [Node.js](https://nodejs.org), and
-    [Yarn 1](https://classic.yarnpkg.com/en/docs/install).
+## Commands
 
-1.  [Fork](https://docs.github.com/en/github/getting-started-with-github/fork-a-repo)
-    the MDN [content](https://github.com/mdn/content) and
-    [yari](https://github.com/mdn/yari) repositories using the Fork button on
-    GitHub.
+- `npm run start`
+  - runs the rari server and the live-reloading development server together
+  - run with `NODE_ENV=production` to run rari with the preview server, you'll need to have run `npm run build` first
+- `node --env-file=.env --run rari -- serve`
+  - runs the rari server
+  - necessary for `npm run dev` and `npm run preview`
+- `npm run dev`
+  - brings up the live-reloading development server, likely what you want for doing local development
+- `npm run build`
+  - builds the production js/css/asset bundles
+  - must be run at least once for `npm run preview` to work
+- `npm run ssr`
+  - renders the documents built by rari to HTML, using the production bundles
+  - uses one worker thread per available CPU core, set `SSR_WORKERS` to override (e.g. `SSR_WORKERS=4 npm run ssr`)
+- `npm run preview`
+  - runs the preview server: using the production bundles with the rari server: useful for testing our prod rspack config
+- `npm run test`
+  - runs linting and tests with various options, read more in [the testing README](./test/README.md)
 
-1.  Clone the forked repositories to your computer using the following commands
-    (replace `[your account]` with the account you forked the repositories to):
+## L10n
 
-        git clone https://github.com/[your_account]/content.git
-        git clone https://github.com/[your_account]/yari.git
+See [the l10n README](./l10n/README.md).
 
-<!-- markdownlint-enable list-marker-space -->
+### Accessing from non-localhost
 
-To run Yari locally, you'll first need to install its dependencies and build the
-app locally. Do this like so:
+If you want to access fred from a different machine, you'll need to run with certain options:
 
-    cd yari
-    yarn install
+- `HTTPS=true` to enable HTTPS with a self-signed certificate, allowing Web APIs requiring a secure context to work
+- `ORIGIN_MAIN=your.local.ip.address` to allowlist your address in the playground
 
-See the [troubleshooting](#troubleshooting) section below if you run into
-problems.
+So a full command might look like:
 
-Now copy the `.env-dist` file to `.env`:
+```
+HTTPS=true ORIGIN_MAIN=192.168.0.99 npm run start
+```
 
-    cp .env-dist .env
+This is useful to test changes on mobile, tablets and other platforms.
 
-If you followed the instructions above and cloned the `content` repo as a
-sibling of your `yari` repo, the `CONTENT_ROOT` environment variable is already
-set and Yari will be able to find the content it needs to render.
+## Development principles
 
-At this point, you can get started. Run the following lines to compile required
-files, start the Yari web server running, and open it in your browser:
+### Supported Browsers
 
-    yarn dev
-    open http://localhost:3000
+_tl;dr_ For visitors to MDN, we support the _Baseline widely available browser set_, with some minor modifications.
 
-If you prefer you can use `yarn start`, which will re-use any previously
-compiled files; this is "riskier" but faster. `yarn dev` always ensures that
-everything is up-to-date.
+#### Browsers
 
-The `yarn start` command also starts a server with slightly different behavior —
-it doesn't automatically reload when its source code files change, so use with
-caution.
+The [_Baseline widely available browser set_](https://developer.mozilla.org/en-US/docs/Glossary/Baseline/Compatibility) is defined as browsers from the _Core browser set_ whose initial release date is on or before 30 months prior to today's date, plus long-term support releases.
 
-See also our [reviewing guide](docs/REVIEWING.md) for information on how to
-review Yari changes.
+MDN supports these browsers, along with Firefox for iOS and all currently active Firefox ESR versions:
 
-### Pull request requirements
+- Apple Safari (iOS, macOS) — released within the last 2½ years
+- Google Chrome (Android, Desktop) — released within the last 2½ years
+- Microsoft Edge (Desktop) — released within the last 2½ years
+- Mozilla Firefox (Android, Desktop, iOS) — released within the last 2½ years
+- Mozilla Firefox ESR — currently supported by Mozilla
 
-Firstly, thank you for your interest in contributing to Yari! We do have a few
-requirements when it comes to pull requests:
+#### "Supported"
 
-1. Please make use of a
-   [feature branch workflow](https://www.atlassian.com/git/tutorials/comparing-workflows/feature-branch-workflow).
-2. We prefer if you use the
-   [conventional commits format](https://www.conventionalcommits.org/) when
-   making pull requests.
-3. Lastly, we require that all commits are signed. Please see the documentation
-   [about signed commits](https://docs.github.com/en/authentication/managing-commit-signature-verification/about-commit-signature-verification)
-   and
-   [how to sign yours](https://docs.github.com/en/authentication/managing-commit-signature-verification/signing-commits)
-   on GitHub.
+In this context, _supported_ means that any issues with rendering or functionality are considered bugs and will be addressed as soon as reasonably possible.
 
-Thank you for your understanding! We look forward to your contributions.
+For issues encountered while using unsupported browsers, we decide on a case-by-case assessment of whether the issue will be addressed; however, these issues may have lower priority. Issues with screen readers and other accessibility aids are likely to carry higher levels of importance.
 
-### How to stay up-to-date
+We make our best efforts to design MDN to degrade gracefully; however, there are no guarantees of any level of functionality outside the supported browser set.
 
-Periodically, the code and the content changes. Make sure you stay up-to-date
-with something along the following lines (replace `yari-origin` with whatever
-you called [the remote location](https://git-scm.com/docs/git-remote) of the
-original yari repo):
+### Environment variables
 
-    git pull yari-origin main
-    yarn
-    yarn dev
+See [the environment variables README](./components/env/README.md).
 
-When you embark on making a change, do it on a new branch, for example
-`git checkout -b my-new-branch`.
+### Inline JS
 
-## License
+We need to run some JS as soon as possible at page load, to avoid layout shifts and flashes.
+We place this JS in `entry.inline.js`, and it's inlined on page load.
+Rspack also generates the necessary CSP hash when doing a prod build with `npm run build`.
 
-All source code is [MPL-2.0](https://www.mozilla.org/en-US/MPL/2.0/).
+If this code is component-specific, it can be [imported with `?source&csp=true`](#custom-imports) and used to set the value of `static inlineScript` in a Server Component.
+Remember to add an additional entry to the CSP hashes in yari when doing so.
 
-For content, see its
-[license](https://github.com/mdn/content/blob/main/LICENSE.md) in the
-[mdn/content repository](https://github.com/mdn/content).
+### Custom Imports
 
-## Supported Platforms
+We support a range of non-standard imports in our JavaScript. This includes:
 
-`yari` runs on Linux in CI, and when building for Production.
+#### `?source`
 
-We also support Windows and MacOS, however we don't aim to proactively catch
-issues with CI on those platforms. If bugs arise, we welcome issues being filed,
-or PRs being opened to fix them.
+Imports the raw source of the file as a string.
 
-## How it works
+```js
+import text from "./some-file.txt?source";
+```
 
-Yari does a number of things, the most important of which is to render and serve
-the MDN content found in the [content repo](https://github.com/mdn/content).
-Each document is stored as an `index.md` (recommended) or `index.html` file that
-contains metadata presented as YAML
-[front-matter](https://github.com/mdn/content#fundamental-concepts) followed by
-the document source.
+#### `&csp=true`
 
-The builder converts these "source files" into "build files" using a CLI tool
-that iterates over the files, builds the HTML, and lastly packages it up with
-the front-end code, ready to be served as static files.
+Logs a CSP hash for the source of the file during the production build.
+Most commonly used alongside `?source` to import the source of a file for inlining in a component, which needs to be allowlisted in our CSP:
 
-## Development
+```js
+import inlineScript from "./inline.js?source&csp=true";
+```
 
-The `yarn start` command encapsulates the front-end dev server (on
-<http://localhost:3000>) and the `server` (on <http://localhost:5042>).
+### Layout
 
-All the sub-commands of `yarn start` can be broken down and run individually if
-you want to work more rapidly.
+See [the layout README](./components/layout/README.md).
 
-### Setting up `$EDITOR`
+### Media queries
 
-If you configure an environment variable called `EDITOR`, either on your system
-as a whole or in the root `.env` file, it can be used in the development server
-to link to sources which, when clicked, open in your preferred editor/IDE. For
-example, in the root of the repo you could run:
+See [the media queries README](./components/media/README.md).
 
-    echo 'EDITOR=code' >> .env
+### Sandbox
 
-Now clicking certain links will open files directly in the currently open VS
-Code IDE (replace `code` in the above command with a different text editor name
-if needed, e.g. `atom` or whatever). To test it, view any document on
-<http://localhost:3000> and click the "Open in your editor" button.
+We have a basic sandbox for testing and styling components in isolation at http://localhost:3000/sandbox
 
-### How the server works
+To add a component to the sandbox, add a `sandbox.js` file to the component, which exports a class named like `MyComponentSandbox` which extends the `SandboxComponent` exported from `components/sandbox/class.js`.
 
-The `server` has two main jobs:
+### Components and Elements
 
-1. Simulate serving the site (e.g. from a server, S3 or a CDN).
-2. Trigger builds of documents that haven't been built, by URL.
+- Components should live in the `components/` folder, with reserved names which cause certain behavior, explained further below:
+  - `component-name/`
+    - `global.css` - (reserved): automatically added to global styles
+    - `element.js` - (reserved): custom element, automatically imported client side, always imported server side
+    - `element.css` - (recommended): styles for custom element's shadow dom
+    - `server.js` - (reserved): server component, will automatically load the adjacent `server.css` file when used
+    - `server.css` - (reserved): automatically added to page styles when its server component is used in that page
+- `global.css`: components which have CSS which should be loaded on _all_ pages should expose that through a `global.css` file:
+  - This should be used sparingly, use it for things needed in almost all components, like colors, fonts, etc.
+  - Or, when creating a custom element, use it to set the "browser default" styles on that custom element: usually as simple as just `mdn-component-name { display: block; }` or similar
+- `element.js`: custom elements should be defined in `components/component-name/element.js`
+  - The class should be exported, and named `MDNComponentName`
+    - Acronyms should be kept all caps, to match the naming of `HTMLElement` class names, and added to `ACRONYMS` in `build/plugins/generate-element-map.js` to allow the correct types to be generated
+  - The element should be registered with a name of `mdn-component-name`
+  - If all this is done:
+    - The element will be automatically loaded client side if it's present in the DOM at page load
+      - Elements inserted client side (i.e. in a hook, or another custom element) won't be automatically loaded, and the hook should handle loading them: probably with an async `import()`
+    - The element will be automatically loaded server side for SSR
+    - The element will automatically be added to `types/element-map.d.ts` to provide proper types in e.g. `querySelector("mdn-component-name")`
+- `server.js`: server components should be defined in `components/component-name/server.js`
+  - The class should extend `ServerComponent` from `components/server/index.js`, and be named `ComponentName`
+- `server.css`: server component styles should be placed in `components/component-name/server.css`
+  - These will be automatically loaded server side when the adjacent `ServerComponent` is used
+    - Therefore, these styles should be scoped to the component, usually with a wrapping class
 
-### Linting
+### Typing
 
-All JavaScript and TypeScript code needs to be formatted with `prettier` and
-it's easy to test this with:
+- We use [TypeScript in JSDoc annotations](https://www.typescriptlang.org/docs/handbook/jsdoc-supported-types.html) for typing, so we can write and directly execute JavaScript (with no transpilation step)
+- We occasionally use TypeScript files directly for writing types/interface which are too complex to easily write in JSDoc
+- Eventually we'll have a fully typed codebase, with no errors: while we're in active development we can ignore errors in the interest of development speed/pragmatism:
+  - If we do so, we should use `// @ts-expect-error` so we get an error when we fix the error and don't leave unnecessary `// @ts-ignore` comments lying around. While we're in active development these can lack a comment, but eventually we'll require an explanatory comment on each.
 
-    yarn prettier-check
+### Hydration errors
 
-And conveniently, if you're not even interested in what the flaws were, run:
+If our server side rendered custom elements are different to the initial state of our custom elements when rendered client side, Lit will error out during hydration, stopping the execution of our client side JS.
 
-    yarn prettier-format
+To avoid this, don't compute things that are server/client dependent in `connectedCallback` (or run functions which do this). Instead you must run these in `firstUpdated` (despite the warning lit will raise in development about the element scheduling an update after an update completed).
 
-When you ran `yarn` for the first time (`yarn` is an alias for `yarn install`)
-it automatically sets up a `git` pre-commit hook that uses `lint-staged` — a
-wrapper for `prettier` that checks only the files in the git commit.
+This issue is tracked upstream: https://github.com/lit/lit/issues/1434
 
-If you have doubts about formatting, submit your pull request anyway. If you
-have formatting flaws, the
-[pull request checks](https://github.com/features/actions) should catch it.
+### Simplified HTML
 
-### Upgrading Packages
+`entry.ssr.js` exports a top-level `renderSimplified` function: the purpose of this is to render a very basic HTML page for a particular path, which is useful for embedding MDN content as templated HTML in other contexts.
 
-We maintain the dependencies using `Dependabot` in GitHub but if you want to
-manually upgrade them you can use:
+Any server component can define a `renderSimplified` method to define the simplified form of that component. When in the top-level `renderSimplified` context, any calls of `ServerComponent.render()` will automatically call the `renderSimplified` method of that component, falling back to the `render` method. This is so we can nest components with a `renderSimplified` method ("simplified components") within ones without.
 
-    yarn upgrade-interactive --latest
+Server components also have a `simplifiedMode` property set, which is `true` when rendered from the top-level `renderSimplified` function: this allows a small tweak within a `render` method without having to totally re-implement logic in the `renderSimplified` method.
 
-## Building
+There shouldn't be standalone simplified components: the nesting of components should be defined by the requirements of the `render` method. `renderSimplified` should only be added to a component which already exists with a `render` method to give a simplified view of it. This is especially important as, in the future, we may need to add options of what is/isn't rendered within `renderSimplified` for use in different contexts (one context may require a sidebar, another may not, for instance).
 
-The `server` builds content automatically (on-the-fly) when you're viewing
-pages, but you can pre-emptively build all the content in advance if desired.
-One potential advantage is that you can get a more complete list of all possible
-"flaws" across all documents before you even visit them.
+You can preview the rendering locally by setting `FRED_SIMPLE_HTML`:
 
-The most fundamental CLI command is:
+```
+FRED_SIMPLE_HTML=true npm run start
+```
 
-    yarn build
+Then visit a documentation path directly, e.g. http://localhost:3000/en-US/docs/Web/
 
-### What gets built
+If you're loading a path which isn't rendering anything (like the homepage), check if it's defined in `renderSimplified` in `entry.ssr.js`: we "opt-in" routes as we need them.
 
-Every `index.html` becomes two files:
+### Testing
 
-- `index.html` — a fully formed and complete HTML file
-- `index.json` — the state information React needs to build the page in the
-  client
+See [the testing README](./test/README.md).
 
-### Flaw checks
+### Pull Request Analysis
 
-When building you can enable specific "flaw checks" and their level of handling.
-Some flaws are "cosmetic" and some are more severe but they should never block a
-full build.
+When a pull request is submitted, automated systems may be employed to run linting and test suites.
 
-More information about how to set flaws can be found in `docs/envvars.md`.
+Our infrastructure includes the use of AI-assisted tooling. These systems function as automated review assistants, similar to enhanced linters. They may analyze changes and provide suggestions or feedback, but they do not have the ability to make decisions, approve changes, or modify pull requests.
 
-Essentially, the default is to _warn_ about any flaw and you can see those flaws
-when using <http://localhost:3000>. For completed builds, all flaws are ignored.
-This makes the build faster and there's also no good place to display the flaws
-in a production-grade build.
-
-**In the future**, we might make the default flaw level `error` instead. That
-means that any new edits to (or creation of) any document will break in
-continuous integration if there's a single flaw and the onus will be on you to
-fix it.
-
-## Icons and logos
-
-The various formats and sizes of the favicon are generated from the file
-`mdn-web-docs.svg` in the repository root. This file is then converted to
-favicons using [realfavicongenerator.net](https://realfavicongenerator.net/). To
-generate new favicons, edit or replace the `mdn-web-docs.svg` file and then
-re-upload that to realfavicongenerator.net.
-
-## Contact
-
-If you want to talk to us, ask questions, and find out more, join the discussion
-on the
-[MDN Web Docs chat room](https://chat.mozilla.org/#/room/#mdn:mozilla.org) on
-[Matrix](https://wiki.mozilla.org/Matrix).
-
-## Troubleshooting
-
-Some common issues and how to resolve them.
-
-### `Error: ENOSPC: System limit for number of file watchers reached`
-
-There are two options to resolve this.
-
-1. Disable the watcher via
-   [`REACT_APP_NO_WATCHER`](docs/envvars.md#react_app_no_watcher)
-
-   `echo REACT_APP_NO_WATCHER=true >> .env`
-
-2. Increase `max_user_watches`:\
-   See <https://github.com/guard/listen#increasing-the-amount-of-inotify-watchers>
-
-### `Error: Cannot find module 'levenary'`
-
-We can't know for sure what's causing this error but speculate a bug in how
-`yarn` fails to resolve if certain `@babel` helper libs should install its own
-sub-dependencies. A sure way to solve it is to run:
-
-    rm -fr node_modules
-    yarn install
-
-### `Error: listen EADDRINUSE: address already in use :::5042`
-
-The default server port `:5042` might be in use by another process. To resolve
-this, you can pick any unused port (e.g., 6000) and run the following:
-
-    echo SERVER_PORT=6000 >> .env
-
-### Yarn install errors
-
-If you get errors while installing dependencies via yarn on a Mac, you may need
-to install some additional packages. Check the error message for the package
-name causing the problem.
-
-1. First, install [brew](https://brew.sh/) if you haven’t already
-
-1. To fix problems with `gifsicle`:
-
-   brew install automake autoconf libtool
-
-1. To fix problems with `pngquant-bin`:
-
-   brew install pkg-config
-
-1. To fix problems with `mozjpeg`:
-
-   brew install libpng sudo ln -s
-   /opt/homebrew/Cellar/libpng/1.6.40/lib/libpng16.a /usr/local/lib/libpng16.a
-
-You may need to adjust the path to `libpng16.a` depending on the version of
-`libpng` you have installed.
+AI-assisted linting/review is strictly limited to MDN’s engineering repositories (i.e. the code behind MDN), and is not applied to repositories that contain MDN’s content.

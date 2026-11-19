@@ -1,0 +1,138 @@
+.color-theme {
+  --color-theme-light-dark: url("../icon/contrast.svg");
+  --color-theme-light: url("../icon/sun.svg");
+  --color-theme-dark: url("../icon/moon.svg");
+
+  position: relative;
+}
+
+.color-theme__button {
+  display: flex;
+
+  column-gap: 0.25rem;
+
+  align-items: center;
+
+  padding: 0 0.5rem;
+  margin: 0;
+
+  font: inherit;
+
+  color: inherit;
+
+  cursor: pointer;
+
+  background-color: transparent;
+  border: none;
+
+  &:is(:hover, :focus, [aria-expanded="true"]) {
+    background-color: var(--color-background-secondary);
+  }
+
+  @media (--screen-small-and-narrower) {
+    > span {
+      display: none;
+    }
+  }
+
+  &::before {
+    width: 1.25rem;
+    height: 1.25rem;
+
+    content: "";
+
+    background-color: currentcolor;
+
+    mask-size: cover;
+  }
+
+  &[data-mode="light dark"]::before {
+    mask-image: var(--color-theme-light-dark);
+  }
+
+  &[data-mode="light"]::before {
+    mask-image: var(--color-theme-light);
+  }
+
+  &[data-mode="dark"]::before {
+    mask-image: var(--color-theme-dark);
+  }
+}
+
+.color-theme__dropdown {
+  position: absolute;
+  right: 0;
+  z-index: 1;
+
+  width: max-content;
+
+  padding: 0.75rem;
+  margin: 0;
+
+  background-color: var(--color-background-primary);
+  border: 1px solid var(--color-border-primary);
+}
+
+.color-theme__list {
+  width: max-content;
+
+  padding: 0;
+  margin: 0;
+
+  list-style: none;
+
+  background-color: var(--color-background-primary);
+}
+
+.color-theme__option {
+  display: flex;
+
+  column-gap: 0.25rem;
+
+  align-items: center;
+
+  width: 100%;
+
+  padding: 0.25rem;
+  margin: 0;
+
+  font: inherit;
+
+  color: var(--color-text-primary);
+
+  cursor: pointer;
+
+  background-color: transparent;
+  border: none;
+
+  &:hover {
+    background-color: var(--color-background-secondary);
+  }
+
+  &::before {
+    width: 1.25rem;
+    height: 1.25rem;
+
+    content: "";
+
+    background-color: currentcolor;
+
+    mask-size: cover;
+  }
+
+  &[data-mode="light dark"]::before {
+    mask-image: var(--color-theme-light-dark);
+  }
+
+  &[data-mode="light"]::before {
+    mask-image: var(--color-theme-light);
+  }
+
+  &[data-mode="dark"]::before {
+    mask-image: var(--color-theme-dark);
+  }
+
+  &[data-current] {
+    background: var(--color-background-secondary);
+  }
+}

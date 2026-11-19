@@ -1,0 +1,42 @@
+/** Content feedback. */
+
+.content-feedback {
+  padding: 0;
+  margin: 0;
+  margin-bottom: 0.25rem;
+
+  border: none;
+
+  > label {
+    display: block;
+    margin-bottom: 0.25rem;
+  }
+
+  .thank-you {
+    display: block;
+    margin-bottom: calc(2.75rem + 2px);
+  }
+
+  mdn-button {
+    /* Ensure both buttons have same size. */
+    flex: 1;
+    min-width: 0;
+  }
+}
+
+.content-feedback--buttons {
+  /* Ensure both buttons take minimal width. */
+  display: inline-flex;
+  gap: 0.75rem;
+  margin: 0.25rem 0;
+}
+
+.content-feedback--radios {
+  display: flex;
+
+  gap: 0.25rem;
+
+  align-items: center;
+
+  margin: 0.25rem 0;
+}

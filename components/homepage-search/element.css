@@ -1,0 +1,34 @@
+@import url("../global/global.css");
+
+.mdn-homepage-search {
+  display: flex;
+
+  gap: 0.25em;
+
+  align-items: center;
+
+  padding: 0.8em 1em;
+  margin: 0 auto;
+
+  font-size: var(--font-size-large);
+
+  background-color: transparent;
+  border: 2px solid var(--color-border-primary);
+  border-radius: var(--radius-full);
+
+  &:hover {
+    background-color: var(--color-background-secondary);
+  }
+
+  &::before {
+    width: 1em;
+    height: 1em;
+
+    content: "";
+
+    background-color: currentcolor;
+
+    mask-image: url("../icon/search.svg");
+    mask-size: contain;
+  }
+}

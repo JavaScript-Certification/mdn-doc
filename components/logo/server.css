@@ -1,0 +1,17 @@
+.logo {
+  display: block;
+  padding: 0.5rem;
+}
+
+.logo__image {
+  display: block;
+}
+
+.logo__letter,
+.logo__cursor {
+  fill: light-dark(var(--color-blue-50), var(--color-blue-80));
+}
+
+.logo__text {
+  fill: var(--color-text-primary);
+}

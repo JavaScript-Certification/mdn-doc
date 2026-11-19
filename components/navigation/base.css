@@ -1,0 +1,10 @@
+/* Navigation */
+
+.navigation {
+  background-color: var(--color-background-page);
+
+  &[data-scheme="dark"] {
+    color: var(--color-text-primary);
+    color-scheme: dark;
+  }
+}

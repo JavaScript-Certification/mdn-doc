@@ -1,0 +1,141 @@
+.icon {
+  --size: var(--icon-size, 1rem);
+
+  display: inline-block;
+
+  flex-shrink: 0;
+
+  width: var(--size);
+  height: var(--size);
+
+  vertical-align: middle;
+
+  background-color: var(--color-border-secondary);
+
+  mask-size: cover;
+
+  /** Platform icons. */
+  &.icon-desktop {
+    mask-image: url("../icon/monitor.svg");
+  }
+
+  &.icon-mobile {
+    mask-image: url("../icon/smartphone.svg");
+  }
+
+  &.icon-server {
+    mask-image: url("../icon/server.svg");
+  }
+
+  &.icon-xr {
+    mask-image: url("../icon/glasses.svg");
+  }
+
+  /** Fallback first so browser icons override it. */
+
+  &.icon-browser {
+    mask-image: url("../icon/globe.svg");
+  }
+
+  &.icon-bun {
+    mask-image: url("../icon/browser/bun.svg");
+  }
+
+  &.icon-chrome {
+    mask-image: url("../icon/browser/chrome.svg");
+  }
+
+  &.icon-deno {
+    mask-image: url("../icon/browser/deno.svg");
+  }
+
+  &.icon-edge {
+    mask-image: url("../icon/browser/edge.svg");
+  }
+
+  &.icon-firefox {
+    mask-image: url("../icon/browser/firefox.svg");
+  }
+
+  &.icon-edge {
+    mask-image: url("../icon/browser/edge.svg");
+  }
+
+  &.icon-nodejs {
+    mask-image: url("../icon/browser/nodejs.svg");
+  }
+
+  &.icon-opera {
+    mask-image: url("../icon/browser/opera.svg");
+  }
+
+  &.icon-safari {
+    mask-image: url("../icon/browser/safari.svg");
+  }
+
+  &.icon-samsunginternet {
+    mask-image: url("../icon/browser/samsung-internet.svg");
+  }
+
+  &.icon-webview {
+    mask-image: url("../icon/browser/webview.svg");
+  }
+
+  /** Status icons. */
+
+  &.icon-no {
+    mask-image: url("../icon/circle-x.svg");
+  }
+
+  &.icon-partial {
+    mask-image: url("../icon/circle-slash.svg");
+  }
+
+  &.icon-yes {
+    mask-image: url("../icon/check.svg");
+  }
+
+  &.icon-yes-circle {
+    mask-image: url("../icon/circle-check.svg");
+  }
+
+  &.icon-experimental {
+    mask-image: url("../icon/flask-conical.svg");
+  }
+
+  &.icon-deprecated {
+    mask-image: url("../icon/trash-2.svg");
+  }
+
+  &.icon-nonstandard {
+    mask-image: url("../icon/triangle-alert.svg");
+  }
+
+  &.icon-footnote {
+    mask-image: url("../icon/asterisk.svg");
+  }
+
+  &.icon-unknown {
+    mask-image: url("../icon/circle-help.svg");
+  }
+
+  &.icon-prefix {
+    mask-image: url("../icon/mdn-prefix.svg");
+  }
+
+  &.icon-altname {
+    mask-image: url("../icon/git-fork.svg");
+  }
+
+  &.icon-disabled {
+    mask-image: url("../icon/flag.svg");
+  }
+
+  &.icon-more {
+    mask-image: url("../icon/ellipsis.svg");
+  }
+
+  &.icon-preview {
+    mask-image: url("../icon/flask-conical.svg");
+  }
+}

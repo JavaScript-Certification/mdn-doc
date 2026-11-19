@@ -1,0 +1,12 @@
+@import url("./server.css");
+
+:host {
+  display: inline-flex;
+  vertical-align: middle;
+}
+
+.button {
+  box-sizing: border-box;
+  width: 100%;
+  height: 100%;
+}

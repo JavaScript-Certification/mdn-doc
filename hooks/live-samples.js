@@ -1,0 +1,48 @@
+/**
+ * @import { MDNCodeExample } from "../components/code-example/element.js";
+ */
+
+for (const iframe of document.querySelectorAll("iframe[data-live-id]")) {
+  if (iframe instanceof HTMLIFrameElement) {
+    const { liveId, livePath } = iframe.dataset;
+    if (liveId) {
+      /** @type {Record<string, string>} */
+      const liveSampleCode = {};
+      /** @type {MDNCodeExample[]} */
+      const codeExamples = [];
+
+      const escapedId = liveId.replaceAll(".", String.raw`\.`);
+      for (const element of document.querySelectorAll(
+        `.live-sample___${escapedId}, .live-sample---${escapedId}`,
+      )) {
+        const { MDNCodeExample, upgradePre } =
+          await import("../components/code-example/element.js");
+        const codeExample =
+          element instanceof MDNCodeExample ? element : upgradePre(element);
+        if (codeExample) {
+          codeExamples.push(codeExample);
+          const { language, code } = codeExample;
+          if (liveSampleCode[language]) {
+            liveSampleCode[language] += code;
+          } else {
+            liveSampleCode[language] = code;
+          }
+        }
+      }
+
+      await import("../components/live-sample-result/element.js");
+      const result = document.createElement("mdn-live-sample-result");
+      result.liveId = liveId;
+      result.code = liveSampleCode;
+      result.srcPrefix = livePath;
+      result.allow = iframe.allow || undefined;
+      result.sandbox = iframe.sandbox.toString();
+      result.height = iframe.height;
+      iframe.closest(".code-example")?.replaceWith(result);
+
+      for (const codeExample of codeExamples) {
+        codeExample.liveSample ||= result;
+      }
+    }
+  }
+}

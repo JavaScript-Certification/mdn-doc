@@ -1,0 +1,60 @@
+pre-commit:
+  parallel: true
+  jobs:
+    - name: prettier
+      run: npx prettier --write --cache --ignore-unknown {staged_files}
+      stage_fixed: true
+
+    - name: eslint
+      run: npx eslint --fix --cache {staged_files}
+      stage_fixed: true
+
+    - name: eslint (global)
+      run: npx eslint --fix --cache .
+      glob: eslint.config.js
+      stage_fixed: true
+
+    - name: lit-analyzer
+      run: npm run lit-analyzer -- {staged_files}
+      glob: "components/**/*.js"
+
+    - name: stylelint
+      run: npx stylelint --fix --cache {staged_files}
+      glob: "*.css"
+      stage_fixed: true
+
+    - name: stylelint (global)
+      run: npx stylelint --fix '**/*.css' --cache --ignore-path .gitignore
+      glob: stylelint.config.js
+      stage_fixed: true
+
+pre-push:
+  piped: true
+  jobs:
+    - run: npm install
+
+    - name: lint
+      group:
+        parallel: true
+        jobs:
+          - name: eslint
+            run: npx eslint --cache
+          - name: lit-analyzer
+            run: npm run lit-analyzer -- components
+          - name: stylelint
+            run: npx stylelint '**/*.css' --cache --ignore-path .gitignore
+          - name: tsc
+            run: npx --package=typescript tsc
+          - name: lint l10n strings
+            run: npm run l10n -- --lint
+
+post-merge:
+  only:
+    - ref: main
+  commands:
+    npm-install:
+      run: npm install --ignore-scripts
+
+output:
+  - summary
+  - failure

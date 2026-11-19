@@ -1,0 +1,100 @@
+/* Compat (desktop) */
+
+@media (--screen-small-and-wider) {
+  .bc-table {
+    grid-template-columns: minmax(20vw, 1fr) repeat(
+        var(--compat-table-browser-count),
+        minmax(0, var(--compat-browser-column-max))
+      );
+
+    thead {
+      display: contents;
+
+      .bc-platforms {
+        th {
+          vertical-align: revert;
+        }
+      }
+    }
+
+    tbody {
+      --border: 1px solid var(--color-border-primary);
+
+      /* Border. */
+      tr {
+        &:not(:first-child) {
+          th,
+          td {
+            > * {
+              border-top: var(--border);
+            }
+          }
+
+          .bc-feature {
+            border-top: var(--border);
+          }
+        }
+
+        th:not(:first-child),
+        td:not(:first-child) {
+          > * {
+            border-left: var(--border);
+          }
+        }
+      }
+    }
+
+    td,
+    th {
+      padding: 0.25rem;
+      background: inherit;
+    }
+
+    td.bc-support {
+      padding: 0;
+
+      > button {
+        padding: 0.25rem;
+      }
+    }
+
+    button[aria-expanded="false"] ~ .timeline {
+      display: none;
+    }
+
+    .timeline {
+      border-top: var(--border);
+      border-left: none !important;
+    }
+
+    .bc-has-history {
+      & > button[aria-expanded="true"] {
+        /* Highlight expanded item. */
+        --padding-bottom-offset: -2px;
+        border-bottom: 2px solid var(--color-border-primary);
+      }
+
+      > button:hover {
+        background: var(--color-background-secondary);
+      }
+    }
+  }
+
+  /* Anchor positioned cell content so `.table-container` clips it. */
+  .table-container-inner {
+    position: relative;
+  }
+
+  .bcd-cell-text-wrapper {
+    .bc-support-level,
+    .bc-browser-name {
+      display: none;
+    }
+  }
+
+  .bc-support {
+    .bc-support-level {
+      display: none;
+    }
+  }
+}

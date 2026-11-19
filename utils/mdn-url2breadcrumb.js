@@ -1,0 +1,33 @@
+/**
+ * Returns an MDN URL into a Breadcrumb-like string representation.
+ *
+ * @param {string} url - the full MDN URL (e.g. "/en-US/docs/Web/HTML/Reference/Elements/a").
+ * @param {string} locale - the locale (to omit)
+ * @returns {string} the breadcrumb-like string for the URL.
+ */
+export function mdnUrl2Breadcrumb(url, locale) {
+  let parents = url
+    .replaceAll("_", " ")
+    .split("/")
+    .filter((p) => !["", "docs"].includes(p));
+
+  const urlLocale = parents.shift();
+  const prefix = urlLocale === locale ? [] : [urlLocale];
+
+  // Replace "API" for clarity.
+  if (parents.at(0) === "Web" && parents.at(1) === "API") {
+    parents[1] = "Web APIs";
+  }
+
+  if (parents.length > 1 && parents.at(0) === "Web") {
+    // Remove virtual "Web" path.
+    parents.shift();
+  }
+
+  if (parents.length > 1) {
+    // Remove current item.
+    parents.pop();
+  }
+
+  return [...prefix, ...parents].join(" / ");
+}

@@ -1,0 +1,51 @@
+@import url("../global/global.css");
+
+:host {
+  display: block;
+}
+
+.tablist-wrapper {
+  position: sticky;
+  top: var(--sticky-header-height);
+  z-index: 2;
+
+  padding: 0 var(--center-padding);
+  margin: 0 calc(var(--center-padding) * -1);
+  margin-bottom: 2rem;
+
+  background: var(--about-bg-secondary);
+}
+
+.tablist {
+  display: flex;
+
+  gap: 3rem;
+
+  overflow-x: auto;
+
+  border-bottom: 1px solid var(--about-tablist-border);
+}
+
+::slotted([slot="tab"]) {
+  flex-shrink: 0;
+
+  font-weight: normal;
+
+  color: var(--about-tablist-color) !important;
+
+  text-decoration: none;
+}
+
+::slotted([slot="tab"]:hover),
+::slotted([slot="tab"].active) {
+  color: var(--about-tablist-active-color) !important;
+  border-bottom: 2px solid var(--about-tablist-active-border);
+}
+
+::slotted([slot="panel"]:not(.active)) {
+  display: none !important;
+}
+
+::slotted([slot="panel"].active) {
+  display: block;
+}

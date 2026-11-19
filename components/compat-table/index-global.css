@@ -1,0 +1,49 @@
+/* Compat (global) */
+
+@import url("../external-link/global.css");
+@import url("../visually-hidden/global.css");
+
+* {
+  box-sizing: border-box;
+  overflow-wrap: break-word;
+}
+
+/* Remove default margin */
+body,
+h1,
+h2,
+h3,
+h4,
+p,
+figure,
+blockquote,
+dl,
+dd {
+  margin: 0;
+}
+
+a {
+  &:link {
+    color: var(--color-link-normal);
+  }
+
+  &:visited {
+    color: var(--color-link-visited);
+  }
+
+  &:hover {
+    text-decoration: none;
+  }
+}
+
+code {
+  width: fit-content;
+  padding: 0.125rem 0.25rem;
+  background-color: var(--color-background-secondary);
+}
+
+button {
+  appearance: none;
+  background: none;
+  border: medium;
+}

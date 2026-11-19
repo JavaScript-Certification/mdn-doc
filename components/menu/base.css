@@ -1,0 +1,202 @@
+/* Base */
+
+/* Tab */
+
+.menu__tab {
+  --menu-tab-background: var(--color-background-blue);
+  --menu-tab-text: var(--color-text-blue);
+
+  &[data-section="learn"] {
+    --menu-tab-icon: url("../icon/graduation-cap.svg");
+    --menu-tab-background: var(--color-background-orange);
+    --menu-tab-text: var(--color-text-orange);
+  }
+
+  &[data-section="tools"] {
+    --menu-tab-icon: url("../icon/wrench.svg");
+    --menu-tab-background: var(--color-background-purple);
+    --menu-tab-text: var(--color-text-purple);
+  }
+
+  &[data-section="about"] {
+    --menu-tab-background: var(--color-background-green);
+    --menu-tab-text: var(--color-text-green);
+  }
+}
+
+/* Tab Button */
+
+.menu__tab-button {
+  margin: 0;
+
+  font: inherit;
+
+  line-height: var(--font-line-ui);
+
+  color: var(--color-text-primary);
+
+  white-space: nowrap;
+
+  cursor: pointer;
+
+  background-color: transparent;
+
+  &:is([aria-expanded="true"], :hover) {
+    color: var(--menu-tab-text);
+    background-color: var(--menu-tab-background);
+  }
+
+  /* Arrow & Icon */
+
+  &::before,
+  &::after {
+    width: 1.25rem;
+    height: 1.25rem;
+
+    background-color: currentcolor;
+
+    mask-size: cover;
+  }
+
+  /* Arrow */
+
+  &::after {
+    content: "";
+    mask-image: url("../icon/chevron-down.svg");
+  }
+
+  &[aria-expanded="true"]::after {
+    scale: -1;
+  }
+
+  /* Icon */
+
+  :is([data-section="learn"], [data-section="tools"]) & {
+    &::before {
+      content: "";
+      mask-image: var(--menu-tab-icon);
+    }
+  }
+}
+
+/* Tab Link */
+
+.menu__tab-link {
+  /* Custom, to match the icon height */
+  line-height: 1.25rem;
+  color: var(--color-text-primary);
+
+  &:hover {
+    color: var(--menu-tab-text);
+    background-color: var(--menu-tab-background);
+  }
+}
+
+/* Panel */
+
+.menu__panel-title {
+  padding: 0.7rem 1.4rem;
+  margin: 0;
+
+  a {
+    color: inherit;
+  }
+}
+
+/* Content */
+
+.menu__panel-content {
+  display: grid;
+  gap: 1.4rem;
+  padding: 1.4rem;
+
+  dl {
+    display: grid;
+
+    row-gap: var(--font-size-small);
+
+    align-content: start;
+
+    margin: 0;
+  }
+
+  dt {
+    font-size: var(--font-size-small);
+
+    color: var(--color-text-secondary);
+
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+
+  dd {
+    margin: 0;
+  }
+
+  ul {
+    display: grid;
+
+    row-gap: 0.5rem;
+
+    padding: 0;
+    margin: 0;
+
+    list-style: none;
+  }
+
+  a {
+    color: var(--color-text-primary);
+    text-decoration: none;
+    text-decoration-color: var(--color-text-secondary);
+
+    &:hover {
+      text-decoration: underline;
+    }
+  }
+}
+
+/* Icon */
+
+.menu__panel-icon {
+  display: inline-flex;
+  align-items: center;
+
+  &::before {
+    display: inline-block;
+
+    width: 1.25rem;
+    height: 1.25rem;
+
+    margin-inline-end: 0.5rem;
+
+    content: "";
+
+    background-color: currentcolor;
+
+    mask-size: cover;
+  }
+
+  &[data-icon="circle-play"]::before {
+    mask-image: url("../icon/circle-play.svg");
+  }
+
+  &[data-icon="shield-check"]::before {
+    mask-image: url("../icon/shield-check.svg");
+  }
+
+  &[data-icon="mdn-m"]::before {
+    mask-image: url("../icon/mdn-m.svg");
+  }
+
+  &[data-icon="chart-no-axes-combined"]::before {
+    mask-image: url("../icon/chart-no-axes-combined.svg");
+  }
+
+  &[data-icon="users"]::before {
+    mask-image: url("../icon/users.svg");
+  }
+
+  &[data-icon="github"]::before {
+    mask-image: url("../icon/social/github.svg");
+  }
+}

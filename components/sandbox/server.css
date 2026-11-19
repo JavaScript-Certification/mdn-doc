@@ -1,0 +1,23 @@
+.sandbox {
+  display: grid;
+
+  grid-template-rows: 100vh;
+  grid-template-columns: 200px 1fr;
+
+  margin: 0;
+
+  > * {
+    overflow: auto;
+  }
+}
+
+.sandbox__sidebar {
+  mdn-color-theme {
+    display: block;
+    margin: 1rem;
+  }
+}
+
+#host {
+  padding: 1rem;
+}

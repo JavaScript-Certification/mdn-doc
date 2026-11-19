@@ -1,0 +1,101 @@
+.notecard,
+.callout {
+  position: relative;
+
+  padding-block: 1px;
+  padding-inline: 1em;
+  padding-inline-start: 3em;
+  margin-block: 1em;
+
+  color: var(--color-text-primary);
+
+  background-color: var(--color-background-secondary);
+  border-inline-start: 2px solid
+    var(--accent-color, var(--color-text-secondary));
+  border-radius: 0.25em;
+
+  &.note,
+  &.secure,
+  &.experimental {
+    background-color: var(--color-background-blue);
+    --accent-color: var(--color-text-blue);
+  }
+
+  &.warning,
+  &.deprecated,
+  &.nonstandard {
+    background-color: var(--color-background-red);
+    --accent-color: var(--color-text-red);
+  }
+
+  &.tip {
+    background-color: var(--color-background-green);
+    --accent-color: var(--color-text-green);
+  }
+
+  &.deprecated,
+  &.experimental,
+  &.nonstandard,
+  &.note,
+  &.secure,
+  &.tip,
+  &.warning,
+  &.worker {
+    &::before {
+      position: absolute;
+      top: 1.45em;
+      left: 1em;
+
+      display: block;
+
+      width: 1em;
+      height: 1em;
+
+      content: "";
+
+      background-color: var(--accent-color, var(--color-text-secondary));
+
+      mask-size: cover;
+    }
+  }
+
+  &.deprecated::before {
+    /* e.g. Window: blur() method */
+    mask-image: url("../icon/trash-2.svg");
+  }
+
+  &.experimental::before {
+    /* e.g. Barcode Detection API */
+    mask-image: url("../icon/flask-conical.svg");
+  }
+
+  &.nonstandard::before {
+    /* e.g. Document: caretRangeFromPoint() method */
+    mask-image: url("../icon/triangle-alert.svg");
+  }
+
+  &.note::before {
+    /* e.g. Barcode Detection API */
+    mask-image: url("../icon/info.svg");
+  }
+
+  &.secure::before {
+    /* e.g. Barcode Detection API */
+    mask-image: url("../icon/lock.svg");
+  }
+
+  &.tip::before {
+    /* (Not used in content yet) */
+    mask-image: url("../icon/lightbulb.svg");
+  }
+
+  &.warning::before {
+    /* e.g. Navigator: scheduling property */
+    mask-image: url("../icon/triangle-alert.svg");
+  }
+
+  &.worker::before {
+    /* e.g. Worker: Worker() constructor (needs rari change) */
+    mask-image: url("../icon/cog.svg");
+  }
+}

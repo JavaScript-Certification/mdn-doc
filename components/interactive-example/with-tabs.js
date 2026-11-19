@@ -1,0 +1,68 @@
+import { decode } from "he";
+import { html } from "lit";
+import { ref } from "lit/directives/ref.js";
+
+import "../button/element.js";
+import "../play-controller/element.js";
+import "../play-editor/element.js";
+import "../play-runner/element.js";
+import "../ix-tab/element.js";
+import "../ix-tab-panel/element.js";
+import "../ix-tab-wrapper/element.js";
+import { L10nMixin } from "../../l10n/mixin.js";
+
+/**
+ * @import { InteractiveExampleBase } from "./element.js";
+ */
+
+/* eslint-disable jsdoc/reject-any-type -- TS mixin constructors require `any[]` (error TS2545) */
+/**
+ * @template {new (...args: any[]) => InteractiveExampleBase} TBase
+ * @param {TBase} Base
+ */
+/* eslint-enable jsdoc/reject-any-type */
+export const InteractiveExampleWithTabs = (Base) =>
+  class extends L10nMixin(Base) {
+    #render() {
+      const id = "ix-tabbed";
+
+      return html`
+        <mdn-play-controller
+          ${ref(this._controller)}
+          run-on-start
+          run-on-change
+        >
+          <div class="template-tabbed" aria-labelledby=${id}>
+            <header>
+              <h4 id=${id}>${decode(this.name)}</h4>
+              <mdn-button id="reset" @click=${this._reset} variant="secondary"
+                >${this.l10n("interactive-example-reset")`Reset`}</mdn-button
+              >
+            </header>
+            <mdn-ix-tab-wrapper>
+              ${this._languages.map(
+                (lang) => html`
+                  <mdn-ix-tab id=${lang}>${this._langName(lang)}</mdn-ix-tab>
+                  <mdn-ix-tab-panel id=${`${lang}-panel`}>
+                    <mdn-play-editor language=${lang}></mdn-play-editor>
+                  </mdn-ix-tab-panel>
+                `,
+              )}
+            </mdn-ix-tab-wrapper>
+            <div class="output-wrapper">
+              <h4>${this.l10n("interactive-example-output")`Output`}</h4>
+              <mdn-play-runner
+                ${ref(this._runner)}
+                sandbox="allow-modals allow-top-navigation-by-user-activation"
+                defaults="ix-tabbed"
+              ></mdn-play-runner>
+            </div>
+          </div>
+        </mdn-play-controller>
+      `;
+    }
+
+    render() {
+      return this._template === "tabbed" ? this.#render() : super.render();
+    }
+  };

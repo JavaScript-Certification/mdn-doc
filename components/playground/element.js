@@ -1,0 +1,565 @@
+import { Task } from "@lit/task";
+import { LitElement, html, nothing } from "lit";
+
+import { L10nMixin } from "../../l10n/mixin.js";
+import { gleanClick } from "../../utils/glean.js";
+import circlePlay from "../icon/circle-play.svg?lit";
+import warningIcon from "../icon/triangle-alert.svg?lit";
+import { globalUser } from "../user/context.js";
+
+import styles from "./element.css?lit";
+import { codeToDataUrl, decompressFromBase64 } from "./utils.js";
+
+import "../play-controller/element.js";
+import "../button/element.js";
+import "../play-editor/element.js";
+import "../play-runner/element.js";
+import "../play-console/element.js";
+import "../modal/element.js";
+import "../login-button/element.js";
+
+/**
+ * @import { MDNModal } from "../modal/element.js";
+ */
+
+const SESSION_KEY = "playground-session-code";
+
+export class MDNPlayground extends L10nMixin(LitElement) {
+  static styles = styles;
+
+  static get properties() {
+    return {
+      _gistID: { state: true },
+    };
+  }
+
+  constructor() {
+    super();
+    this._permalink = "";
+    this._autoRun = true;
+    /** @type {string | undefined} */
+    this._gistId = undefined;
+  }
+
+  get _controller() {
+    return this.shadowRoot?.querySelector("mdn-play-controller");
+  }
+
+  get _shareModal() {
+    return /** @type {MDNModal | null | undefined} */ (
+      this.shadowRoot?.querySelector("mdn-modal.share")
+    );
+  }
+
+  get _reportModal() {
+    return /** @type {MDNModal | null | undefined} */ (
+      this.shadowRoot?.querySelector("mdn-modal.report")
+    );
+  }
+
+  _user = new Task(this, {
+    task: async () => {
+      return await globalUser();
+    },
+  });
+
+  _format() {
+    this._controller?.format();
+  }
+
+  _run() {
+    const controller = this._controller;
+    if (controller) {
+      controller.run();
+      if (!this._autoRun) {
+        this._autoRun = true;
+        controller.runOnChange = true;
+        this._storeSession();
+        this.requestUpdate();
+      }
+    }
+  }
+
+  _share() {
+    this._shareModal?.showModal();
+  }
+
+  _clear() {
+    const controller = this._controller;
+    if (
+      confirm(
+        this.l10n(
+          "playground-do-you-really-want-to-clear-ever",
+        )`Do you really want to clear everything?`,
+      ) &&
+      controller
+    ) {
+      controller.clear();
+      this._autoRun = true;
+      this._storeSession();
+      this.requestUpdate();
+      const urlWithoutSearch = new URL(location.href);
+      urlWithoutSearch.search = "";
+      history.replaceState(undefined, "", urlWithoutSearch);
+    }
+  }
+
+  _reset() {
+    const controller = this._controller;
+    if (
+      confirm(
+        this.l10n(
+          "playground-do-you-really-want-to-revert-you",
+        )`Do you really want to revert your changes?`,
+      ) &&
+      controller
+    ) {
+      controller.reset();
+      this._storeSession();
+      this.requestUpdate();
+    }
+  }
+
+  async _copyMarkdown() {
+    const controller = this._controller;
+    if (controller) {
+      const markdown = Object.entries(controller.code)
+        .map(
+          ([lang, code]) =>
+            code &&
+            `${"```"}${lang}
+${code}
+${"```"}`,
+        )
+        .filter(Boolean)
+        .join("\n\n");
+      await navigator.clipboard.writeText(markdown);
+    }
+  }
+
+  async _copyDataUrl() {
+    const controller = this._controller;
+    if (controller) {
+      const { css, html, js } = controller.code;
+      await navigator.clipboard.writeText(codeToDataUrl({ css, html, js }));
+    }
+  }
+
+  async _createPermalink() {
+    const controller = this._controller;
+    if (controller) {
+      const res = await fetch("/api/v1/play/", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(controller.code),
+      });
+      const { id } = await res.json();
+      const permalink = new URL(location.href);
+      permalink.search = new URLSearchParams({ id }).toString();
+
+      controller.initialCode = controller.code;
+      this._permalink = permalink.toString();
+      history.replaceState(undefined, "", permalink);
+      this.requestUpdate();
+    }
+  }
+
+  async _copyPermalink() {
+    if (this._permalink) {
+      await navigator.clipboard.writeText(this._permalink);
+    }
+  }
+
+  _storeSession() {
+    const controller = this._controller;
+    if (controller) {
+      const { srcPrefix, initialCode, code } = controller;
+      /** @type {import("./types.js").PlaygroundSession} */
+      const session = {
+        srcPrefix,
+        initialCode,
+        code,
+        autoRun: this._autoRun,
+      };
+      sessionStorage.setItem(SESSION_KEY, JSON.stringify(session));
+    }
+  }
+
+  _loadSession() {
+    const { srcPrefix, initialCode, code, autoRun } = stateToSession(
+      JSON.parse(sessionStorage.getItem(SESSION_KEY) || "{}"),
+    );
+    const controller = this._controller;
+    if (controller) {
+      if (autoRun === false) {
+        this._autoRun = false;
+        controller.runOnStart = false;
+        controller.runOnChange = false;
+      }
+      controller.srcPrefix = srcPrefix;
+      controller.initialCode = initialCode;
+      controller.code = code;
+      this.requestUpdate();
+    }
+  }
+
+  async _loadFromUrl() {
+    const controller = this._controller;
+    if (controller) {
+      const params = new URLSearchParams(location.search);
+      const idParam = params.get("id");
+      const stateParam = params.get("state");
+      const srcPrefixParam = params.get("srcPrefix");
+
+      if (idParam) {
+        this._gistId = idParam;
+      }
+
+      const { srcPrefix: srcPrefixState, code } =
+        (await (idParam
+          ? this._sessionFromApi(idParam)
+          : stateParam
+            ? this._sessionFromState(stateParam)
+            : undefined)) || {};
+
+      const srcPrefix = srcPrefixParam || srcPrefixState;
+
+      if (
+        srcPrefix !== undefined &&
+        code !== undefined &&
+        (controller.srcPrefix !== srcPrefix ||
+          !compareCode(controller.initialCode, code))
+      ) {
+        try {
+          if (
+            !opener?.location?.origin ||
+            opener?.location?.origin !== location.origin
+          ) {
+            throw new Error("origin doesn't match");
+          }
+        } catch {
+          this._autoRun = false;
+          controller.runOnStart = false;
+          controller.runOnChange = false;
+        }
+        controller.srcPrefix = srcPrefix;
+        controller.initialCode = code;
+        controller.code = code;
+        this._storeSession();
+      }
+
+      this.requestUpdate();
+    }
+  }
+
+  /** @param {string} id */
+  async _sessionFromApi(id) {
+    const response = await fetch(`/api/v1/play/${encodeURIComponent(id)}`);
+    if (!response.ok) {
+      console.error(response.statusText);
+      return;
+    }
+
+    const permalink = new URL(location.href);
+    permalink.search = new URLSearchParams({ id }).toString();
+    this._permalink = permalink.toString();
+
+    gleanClick("playground: load-shared");
+    const code = await response.json();
+    return stateToSession(code);
+  }
+
+  /** @param {string} stateParam */
+  async _sessionFromState(stateParam) {
+    const { state } = await decompressFromBase64(stateParam);
+    return stateToSession(JSON.parse(state || "{}"));
+  }
+
+  _editorUpdate() {
+    this._storeSession();
+    this.requestUpdate();
+  }
+
+  _reportOpen() {
+    this._reportModal?.showModal();
+  }
+
+  _reportCancel() {
+    this._reportModal?.close();
+  }
+
+  async _reportSubmit() {
+    await fetch("/api/v1/play/flag", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        id: this._gistId,
+        reason: this._reportModal?.querySelector("textarea")?.value,
+      }),
+    });
+    this._reportModal?.close();
+  }
+
+  connectedCallback() {
+    super.connectedCallback();
+    this._user.run();
+  }
+
+  render() {
+    const { code, initialCode } = this._controller ?? {};
+    const hasCode = Object.values(code ?? {}).some(Boolean);
+    const hasInitialCode = Object.values(initialCode ?? {}).some(Boolean);
+    const isResettable = hasInitialCode && !compareCode(code, initialCode);
+
+    return html`
+      <div class="wrapper">
+        <mdn-play-controller run-on-start run-on-change>
+          <section>
+            <aside>
+              <h1>${this.l10n("playground-playground")`Playground`}</h1>
+              <menu>
+                <mdn-button
+                  variant="secondary"
+                  @click=${this._format}
+                  ?disabled=${!hasCode}
+                  >${this.l10n("playground-format")`Format`}</mdn-button
+                >
+                <mdn-button
+                  variant="secondary"
+                  @click=${this._run}
+                  ?disabled=${!hasCode}
+                  >${this.l10n("playground-run")`Run`}</mdn-button
+                >
+                <mdn-button
+                  variant="secondary"
+                  @click=${this._share}
+                  ?disabled=${!hasCode}
+                  data-id="share"
+                  data-glean-id="playground: share-click"
+                  >${this.l10n("playground-share")`Share`}</mdn-button
+                >
+                <mdn-button
+                  variant="secondary"
+                  @click=${this._clear}
+                  ?disabled=${!(hasCode || isResettable)}
+                  data-id="clear"
+                  >${this.l10n("playground-clear")`Clear`}</mdn-button
+                >
+                ${
+                  hasInitialCode
+                    ? html`<mdn-button
+                        variant="secondary"
+                        @click=${this._reset}
+                        ?disabled=${!isResettable}
+                        data-glean-id="playground: reset-click"
+                        >${this.l10n("playground-reset")`Reset`}</mdn-button
+                      >`
+                    : nothing
+                }
+              </menu>
+            </aside>
+            <details open>
+              <summary>HTML</summary>
+              <mdn-play-editor
+                language="html"
+                @update=${this._editorUpdate}
+              ></mdn-play-editor>
+            </details>
+            <details open>
+              <summary>CSS</summary>
+              <mdn-play-editor
+                language="css"
+                @update=${this._editorUpdate}
+              ></mdn-play-editor>
+            </details>
+            <details open>
+              <summary>JAVASCRIPT</summary>
+              <mdn-play-editor
+                language="js"
+                @update=${this._editorUpdate}
+              ></mdn-play-editor>
+            </details>
+          </section>
+          <section class="playground__runner-console">
+            ${
+              this._gistId
+                ? html`<aside class="playground__runner-menu">
+                    <menu>
+                      <mdn-button
+                        @click=${this._reportOpen}
+                        variant="secondary"
+                        .icon=${warningIcon}
+                        data-glean-id="playground: flag-click"
+                      >
+                        ${this.l10n(
+                          "playground-seeing-something-inappropriate",
+                        )`Seeing something inappropriate?`}
+                      </mdn-button>
+                    </menu>
+                  </aside>`
+                : nothing
+            }
+            ${
+              this._autoRun
+                ? nothing
+                : html`<mdn-button
+                    class="overlay-run-button"
+                    @click=${this._run}
+                    variant="plain"
+                  >
+                    <div class="overlay-run-button--header">
+                      ${circlePlay} ${this.l10n("playground-run")`Run`}
+                    </div>
+                    <div class="overlay-run-button--body">
+                      ${this.l10n.raw({ id: "playground-user-shared-warning" })}
+                    </div>
+                  </mdn-button>`
+            }
+            <mdn-play-runner
+              class=${this._autoRun ? nothing : "hidden"}
+            ></mdn-play-runner>
+            <div class="playground__console">
+              <div>${this.l10n("playground-console")`Console`}</div>
+              <mdn-play-console></mdn-play-console>
+            </div>
+          </section>
+        </mdn-play-controller>
+      </div>
+      <mdn-modal class="share">
+        <section>
+          <h2>${this.l10n("playground-share-markdown")`Share Markdown`}</h2>
+          <mdn-button
+            variant="secondary"
+            @click=${this._copyMarkdown}
+            data-glean-id="playground: share-markdown"
+            >${this.l10n(
+              "playground-copy-markdown-to-clipboard",
+            )`Copy markdown to clipboard`}</mdn-button
+          >
+        </section>
+        <section>
+          <h2>${this.l10n("playground-share-data-url")`Share Data URL`}</h2>
+          <mdn-button
+            variant="secondary"
+            @click=${this._copyDataUrl}
+            data-glean-id="playground: share-data-url"
+            >${this.l10n(
+              "playground-copy-data-url-to-clipboard",
+            )`Copy data URL to clipboard`}</mdn-button
+          >
+        </section>
+        <section>
+          <h2>
+            ${this.l10n(
+              "playground-share-your-code-via-permalink",
+            )`Share your code via Permalink`}
+          </h2>
+          ${this._user.render({
+            initial: () =>
+              html`<mdn-login-button
+                data-glean-id="playground: banner-login"
+              ></mdn-login-button>`,
+            pending: () =>
+              html`<mdn-login-button
+                data-glean-id="playground: banner-login"
+              ></mdn-login-button>`,
+            complete: (user) =>
+              user.isAuthenticated
+                ? this._permalink && !isResettable
+                  ? html`
+                      <input .value=${this._permalink} />
+                      <mdn-button
+                        variant="secondary"
+                        @click=${this._copyPermalink}
+                        data-glean-id="playground: share-permalink"
+                        >${this.l10n(
+                          "playground-copy-to-clipboard",
+                        )`Copy to clipboard`}</mdn-button
+                      >
+                    `
+                  : html`<mdn-button
+                      @click=${this._createPermalink}
+                      data-glean-id="playground: share-permalink"
+                      >${this.l10n(
+                        "playground-create-link",
+                      )`Create link`}</mdn-button
+                    >`
+                : html`<mdn-login-button
+                    data-glean-id="playground: banner-login"
+                  ></mdn-login-button>`,
+          })}
+        </section>
+      </mdn-modal>
+      <mdn-modal class="report">
+        <section>
+          <p>
+            ${this.l10n(
+              "playground-report-this-malicious-or-inappro",
+            )`Report this malicious or inappropriate shared playground.`}
+          </p>
+          <label>
+            ${this.l10n(
+              "playground-can-you-please-share-some-detail",
+            )`Can you please share some details on what's wrong with this content:`}
+            <textarea></textarea>
+          </label>
+        </section>
+        <section>
+          <mdn-button variant="secondary" @click=${this._reportCancel}
+            >${this.l10n("playground-cancel")`Cancel`}</mdn-button
+          >
+          <mdn-button @click=${this._reportSubmit}
+            >${this.l10n("playground-report")`Report`}</mdn-button
+          >
+        </section>
+      </mdn-modal>
+    `;
+  }
+
+  firstUpdated() {
+    this._loadSession();
+    this._loadFromUrl();
+  }
+}
+
+customElements.define("mdn-playground", MDNPlayground);
+
+/**
+ * @param {import("./types.js").PlaygroundStateParam | import("./types.js").PlaygroundSession} stateOrSession
+ * @returns {import("./types.js").PlaygroundSession}
+ */
+function stateToSession(stateOrSession) {
+  if ("html" in stateOrSession) {
+    return {
+      srcPrefix: stateOrSession.src || "",
+      code: {
+        html: stateOrSession.html,
+        css: stateOrSession.css,
+        js: stateOrSession.js,
+      },
+    };
+  }
+  if ("srcPrefix" in stateOrSession) {
+    return stateOrSession;
+  }
+  return {
+    srcPrefix: "",
+    code: {},
+  };
+}
+
+/**
+ * @param {Record<string, string>} [a]
+ * @param {Record<string, string>} [b]
+ * @returns {boolean}
+ */
+function compareCode(a, b) {
+  return a === undefined || b === undefined
+    ? a === b
+    : Object.keys(a).length === Object.keys(b).length &&
+        Object.entries(a).every(([k, v]) => b[k] === v);
+}
