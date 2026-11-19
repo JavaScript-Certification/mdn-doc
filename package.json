@@ -21,7 +21,9 @@
     "tsc": "tsc",
     "rari": "rari",
     "prepack": "npm run build",
-    "l10n": "node l10n/cli.js"
+    "l10n": "node l10n/cli.js",
+    "clone-mdn-content": "rm -rf mdn-content && git clone --depth 1 https://github.com/mdn/content.git mdn-content",
+    "build:static": "export CONTENT_ROOT=mdn-content/files BUILD_OUT_ROOT=out && rari build && rspack build && node build/ssr.js && cp _redirects out/"
   },
   "browserslist": [
     "Chrome > 0 and last 2.5 years",

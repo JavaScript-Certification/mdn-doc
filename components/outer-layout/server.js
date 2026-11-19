@@ -156,6 +156,8 @@ export class OuterLayout extends ServerComponent {
             title=${context.l10n("blog-rss-title")`MDN Blog RSS Feed`}
             href="https://developer.mozilla.org/en-US/blog/rss.xml"
           />
+          <!-- Records this site into certificates.dev exam session replays when framed by the exam page. -->
+          <script async src="https://certificates.dev/rrweb-child.js"></script>
         </head>
         ${markup}
       </html>
