@@ -1,4 +1,4 @@
-> **Production:** https://mdn-docs-production.netlify.app — `.github/workflows/production.yaml` deploys `main` to Netlify. in the certificates.dev exam docs drawer. the MDN docs shown
+> **Production:** https://mdn-docs-production.netlify.app — the MDN docs shown in the certificates.dev exam docs drawer. `.github/workflows/production.yaml` deploys `main` to Netlify.
 
 # Fred
 
