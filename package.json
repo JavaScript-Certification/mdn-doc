@@ -30,7 +30,7 @@
     "build:sw": "cd client/pwa && yarn && yarn build:prod",
     "build:sw-dev": "cd client/pwa && yarn && yarn build",
     "check:tsc": "find . -name 'tsconfig.json' ! -wholename '**/node_modules/**' -print0 | xargs -n1 -P 2 -0 sh -c 'cd `dirname $0` && echo \"🔄 $(pwd)\" && npx tsc --noEmit && echo \"☑️  $(pwd)\" || exit 255'",
-    "clone-mdn-content": "rm -rf mdn-content && git clone https://github.com/mdn/content.git mdn-content",
+    "clone-mdn-content": "rm -rf mdn-content && git clone https://github.com/mdn/content.git mdn-content && git -C mdn-content checkout 82877d5cf5a35e0a4d02b7c54aea0ce7d771d5cb",
     "dev": "yarn build:prepare && nf -j Procfile.dev start",
     "eslint": "eslint .",
     "filecheck": "cross-env NODE_OPTIONS='--no-warnings=ExperimentalWarning --loader ts-node/esm' node filecheck/cli.ts",
