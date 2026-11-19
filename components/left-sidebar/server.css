@@ -1,0 +1,192 @@
+@import url("../baseline-indicator/icon.css");
+
+.left-sidebar {
+  padding-bottom: 3rem;
+  overflow-wrap: anywhere;
+
+  /* In lists with a chevron in them, indent by this much: */
+  --sidebar-list-indent-chevron: 1rem;
+
+  /* In lists without a chevron in them, indent by this much: */
+  --sidebar-list-indent: 0.5rem;
+
+  /* Adjust to reduce the gap between chevron icon and left side */
+  --sidebar-chevron-crop: 0.2;
+
+  /* Adjust to set the gap between chevron icon and text on the right */
+  --sidebar-chevron-margin: 0.15;
+
+  h4 {
+    margin: 0;
+    font-size: var(--font-size-large);
+    font-weight: normal;
+  }
+
+  ol {
+    padding: 0;
+    margin: 0;
+    list-style: none;
+
+    &:not(:has(> li > details)) > li {
+      /* List item without any sibling details elements */
+
+      /* Ok to use `:has` as this enhances the display, but isn't required */
+      padding-left: var(--sidebar-list-indent);
+    }
+  }
+
+  details {
+    width: 100%;
+
+    &[open] {
+      > summary {
+        margin-bottom: 0.5rem;
+
+        &::before {
+          transform: rotate(90deg);
+        }
+      }
+    }
+
+    summary {
+      display: flex;
+
+      align-items: center;
+
+      margin-left: calc(var(--sidebar-list-indent-chevron) * -1);
+
+      cursor: pointer;
+
+      &::before {
+        --calc-margin-left: calc(
+          var(--sidebar-list-indent-chevron) * var(--sidebar-chevron-crop) * -1
+        );
+        --calc-margin-right: calc(
+          var(--sidebar-list-indent-chevron) * var(--sidebar-chevron-margin)
+        );
+        --calc-width-height: calc(
+          var(--sidebar-list-indent-chevron) - var(--calc-margin-right) -
+            var(--calc-margin-left)
+        );
+
+        display: inline-block;
+
+        flex-shrink: 0;
+
+        width: var(--calc-width-height);
+        height: var(--calc-width-height);
+
+        margin-right: var(--calc-margin-right);
+        margin-left: var(--calc-margin-left);
+
+        content: "";
+
+        background-color: currentcolor;
+
+        mask-image: url("../icon/chevron-right.svg");
+        mask-size: cover;
+      }
+
+      &:hover {
+        background-color: var(--color-background-secondary);
+
+        &:has(a:hover) {
+          /* Don't highlight, as link click doesn't toggle. */
+          background-color: unset;
+        }
+      }
+    }
+  }
+
+  li {
+    display: block;
+    padding-left: var(--sidebar-list-indent-chevron);
+
+    &:not(:last-child) {
+      margin-bottom: 0.5rem;
+    }
+
+    &.section {
+      padding-left: 0;
+      font-weight: var(--font-weight-bold);
+
+      &:not(:first-child) {
+        margin-top: 1em;
+      }
+    }
+  }
+
+  a,
+  span:not(.sidebar-filter-mark-container) {
+    display: inline-block;
+    padding-block: 0.25rem;
+    vertical-align: middle;
+  }
+
+  a {
+    color: var(--color-text-primary);
+
+    &:hover {
+      color: var(--color-area-link);
+    }
+
+    &:not(:hover) {
+      text-decoration: none;
+    }
+  }
+
+  code {
+    font-family: var(--font-family-code);
+    font-size: var(--font-size-normal);
+    line-height: 1;
+  }
+
+  em {
+    --padding: 0.5rem;
+    --border: 2px;
+
+    display: block;
+
+    padding-inline: var(--padding);
+    margin-left: calc(-1 * (var(--padding) + var(--border)));
+
+    font-style: normal;
+
+    background-color: var(--color-area-background);
+    border-left: var(--border) solid var(--color-area-highlight-border);
+
+    summary > & {
+      padding-left: calc(var(--padding) + var(--sidebar-list-indent-chevron));
+      margin-left: calc(
+        -1 *
+          (var(--padding) + var(--border) + var(--sidebar-list-indent-chevron))
+      );
+    }
+  }
+
+  .icon {
+    margin-left: 0.5ch;
+  }
+
+  mark {
+    /* Sidebar filter highlight */
+    color: unset;
+    background-color: var(--color-background-yellow);
+  }
+}
+
+.left-sidebar__header {
+  position: sticky;
+  top: 0;
+  z-index: 1;
+
+  padding-top: 0.5rem;
+  padding-right: 0.5rem;
+  padding-bottom: 2rem;
+
+  background: linear-gradient(
+    to bottom,
+    var(--color-background-page) 0 calc(100% - 2rem),
+    transparent 100%
+  );
+}

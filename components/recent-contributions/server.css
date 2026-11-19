@@ -1,0 +1,57 @@
+/** Recent contributions (homepage). */
+
+.recent-contributions {
+  padding-left: 0; /* Reset. */
+  border: 1px solid var(--color-border-primary);
+  border-radius: 0.5rem;
+
+  > li {
+    border-top: 1px solid var(--color-border-primary);
+
+    &:first-child {
+      border-top: initial;
+      border-top-left-radius: 0.5rem;
+      border-top-right-radius: 0.5rem;
+    }
+  }
+
+  a {
+    &:link {
+      color: var(--color-text-primary);
+    }
+
+    &:visited {
+      color: var(--color-text-secondary);
+    }
+
+    &:not(:hover) {
+      text-decoration: none;
+    }
+  }
+}
+
+.recent-contributions__item {
+  display: grid;
+
+  grid-template-areas: "repo date" "title title";
+  grid-template-columns: 1fr max-content;
+
+  justify-content: space-between;
+
+  padding: 1rem;
+}
+
+.recent-contributions__repo {
+  grid-area: repo;
+  font-size: var(--font-size-small);
+}
+
+.recent-contributions__date {
+  grid-area: date;
+  font-size: var(--font-size-small);
+  color: var(--color-text-secondary);
+}
+
+.recent-contributions__title {
+  grid-area: title;
+}

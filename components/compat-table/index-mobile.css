@@ -1,0 +1,69 @@
+/* Compat (mobile) */
+
+@media (--screen-xsmall) {
+  .bc-table {
+    grid-template-columns: auto;
+
+    thead {
+      display: none;
+    }
+
+    tr {
+      td.bc-support {
+        display: block;
+        border: none;
+        border-top: 1px solid var(--color-border-primary);
+
+        &:last-child {
+          border-bottom: 1px solid var(--color-border-primary);
+        }
+      }
+    }
+
+    .timeline {
+      /* Align timeline icons with summary icon. Symmetric on mobile because
+         the branch box drops its horizontal padding and reaches both edges
+         of the cell. */
+      margin-right: 0.25rem;
+      margin-left: 0.25rem;
+    }
+
+    .bc-notes-list {
+      /* Mobile uses a single-column grid; don't skip column 1, and the
+         left border that separates from the feature-name column on
+         desktop doesn't apply here. */
+      grid-column: 1 / -1;
+      border-left: none;
+    }
+
+    .bc-branch {
+      /* Use the available width on narrow viewports. */
+      padding-right: 0;
+      padding-left: 0;
+    }
+
+    tr:not(:first-of-type) .bc-feature {
+      /* Feature separator. */
+      border-top: 2px solid var(--color-border-primary);
+    }
+
+    .bc-feature,
+    .bc-support > button {
+      display: flex;
+
+      flex-wrap: wrap;
+
+      gap: 0.5rem;
+
+      align-content: center;
+    }
+  }
+
+  .bc-on-github a {
+    white-space: nowrap;
+  }
+
+  .table-container {
+    overflow-x: auto;
+  }
+}

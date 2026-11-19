@@ -1,0 +1,21 @@
+@import url("../global/global.css");
+@import url("./prism.css");
+@import url("./common.css");
+
+.code-example {
+  .example-header {
+    gap: 0.5rem;
+    padding-right: 0.5rem;
+
+    .language-name {
+      margin-right: auto;
+    }
+  }
+}
+
+@media print {
+  mdn-copy-button,
+  mdn-button {
+    display: none !important;
+  }
+}

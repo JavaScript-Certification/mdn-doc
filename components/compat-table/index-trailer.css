@@ -1,0 +1,60 @@
+/* Compat (common trailer) */
+
+.bcd-cell-text-wrapper {
+  display: flex;
+  flex-direction: row;
+  gap: 0.5rem;
+
+  @media (--screen-small-and-wider) {
+    flex-direction: column;
+    align-items: center;
+  }
+}
+
+.bcd-timeline-cell-text-wrapper {
+  display: flex;
+  flex-direction: row;
+  gap: 0.25rem;
+}
+
+.bcd-cell-text-copy {
+  color: var(--color-text-primary);
+}
+
+.bc-supports-yes {
+  .bcd-cell-text-copy {
+    color: var(--color-text-green);
+  }
+}
+
+.bc-supports-partial {
+  .bcd-cell-text-copy {
+    color: var(--color-text-yellow);
+  }
+}
+
+.bc-supports-no {
+  .bcd-cell-text-copy {
+    color: var(--color-text-red);
+  }
+}
+
+.bcd-cell-icons {
+  display: flex;
+  gap: 0.5rem;
+
+  @media (--screen-small-and-wider) {
+    display: block;
+  }
+}
+
+@media (--screen-small-and-wider) {
+  .bc-table {
+    td.bc-support > button {
+      padding-top: 0.5rem;
+      padding-right: 0.25rem;
+      padding-bottom: calc(0.5rem + var(--padding-bottom-offset, 0px));
+      padding-left: 0.25rem;
+    }
+  }
+}

@@ -1,0 +1,19 @@
+@import url("../global/global.css");
+@import url("../code-example/common.css");
+
+.code-example {
+  .example-header {
+    justify-content: end;
+    padding-right: 0.5rem;
+  }
+}
+
+@media print {
+  .example-header {
+    display: none !important;
+  }
+
+  mdn-button {
+    display: none !important;
+  }
+}

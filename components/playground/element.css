@@ -1,0 +1,201 @@
+@import url("../global/global.css");
+
+.wrapper {
+  display: grid;
+
+  grid-template-areas: "left runner";
+  grid-template-rows: 1fr;
+  grid-template-columns: 1fr 1fr;
+
+  gap: 1rem;
+
+  height: 100%;
+
+  section {
+    display: flex;
+
+    flex-grow: 1;
+    flex-direction: column;
+
+    grid-area: left;
+
+    gap: 1rem;
+
+    aside {
+      display: flex;
+
+      flex-wrap: wrap;
+
+      gap: 0.5rem;
+
+      align-items: center;
+
+      padding: 0.5rem;
+
+      h1 {
+        margin: 0;
+        margin-right: auto;
+        font-size: var(--font-size-normal);
+      }
+
+      menu {
+        display: flex;
+
+        flex-wrap: wrap;
+
+        gap: 0.5rem;
+
+        padding: 0;
+        margin: 0;
+      }
+    }
+
+    details {
+      flex-shrink: 0;
+      flex-direction: column;
+
+      overflow: hidden;
+
+      border: var(--border);
+      border-radius: 0.25rem;
+
+      &[open] {
+        flex-grow: 1;
+        flex-basis: 0;
+        min-height: 12rem;
+
+        mdn-play-editor {
+          display: block;
+        }
+      }
+
+      &::details-content {
+        display: contents;
+      }
+
+      summary {
+        height: 2em;
+
+        padding: 0.5em;
+
+        line-height: var(--font-line-ui);
+
+        cursor: pointer;
+        user-select: none;
+      }
+
+      mdn-play-editor {
+        display: none;
+        height: calc(100% - 2em);
+      }
+    }
+
+    .playground__runner-menu {
+      align-self: flex-end;
+      padding: 0.5rem 0;
+
+      @media (--screen-medium-and-narrower) {
+        align-self: center;
+      }
+    }
+
+    &.playground__runner-console {
+      grid-area: runner;
+      overflow: hidden;
+
+      mdn-play-runner,
+      .overlay-run-button {
+        flex-grow: 1;
+        border: var(--border);
+        border-radius: 0.25rem;
+
+        &.hidden {
+          display: none;
+        }
+      }
+
+      .overlay-run-button {
+        border-color: currentcolor;
+      }
+
+      .overlay-run-button--header {
+        font-size: clamp(1.5rem, 3vw, 3rem);
+
+        svg {
+          width: clamp(1.5rem, 3vw, 3rem) !important;
+          height: clamp(1.5rem, 3vw, 3rem) !important;
+          vertical-align: bottom;
+        }
+      }
+
+      .overlay-run-button--body {
+        margin-top: 0.5rem;
+        line-height: var(--font-line-normal);
+        color: var(--color-text-secondary);
+      }
+
+      .playground__console {
+        background-color: var(--color-background-secondary);
+        border: var(--border);
+        border-radius: 0.25rem;
+
+        div {
+          font-size: var(--font-size-small);
+          font-weight: var(--font-weight-bold);
+          text-align: center;
+        }
+
+        mdn-play-console {
+          height: 6rem;
+        }
+      }
+    }
+  }
+
+  mdn-placement-sidebar {
+    grid-area: place;
+    justify-self: center;
+  }
+
+  @media (--screen-medium-and-narrower) {
+    display: flex;
+    flex-direction: column;
+  }
+}
+
+mdn-modal {
+  section {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+
+    &:not(:last-child) {
+      margin-bottom: 1rem;
+    }
+  }
+
+  h2 {
+    margin: 0;
+    font-size: var(--font-size-normal);
+    font-weight: normal;
+  }
+
+  label {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+
+  p {
+    margin: 0;
+  }
+
+  &.share section {
+    align-items: center;
+  }
+
+  &.report section:last-child {
+    flex-direction: row;
+    justify-content: flex-end;
+  }
+}

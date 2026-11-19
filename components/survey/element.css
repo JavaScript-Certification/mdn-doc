@@ -1,0 +1,79 @@
+@import url("../external-link/global.css");
+
+:host {
+  display: block;
+}
+
+.survey {
+  display: grid;
+
+  row-gap: 0.75rem;
+
+  padding: 1rem;
+  padding-left: 5rem;
+
+  background-color: var(--color-background-purple);
+  border-radius: 0.5rem;
+}
+
+header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  &::before {
+    position: absolute;
+
+    width: 53px;
+    height: 49px;
+
+    margin-top: 1rem;
+    margin-left: calc(-53px - 0.5rem);
+
+    content: "";
+
+    background: url("./assets/survey.svg");
+    background-size: cover;
+  }
+}
+
+p {
+  margin: 0;
+}
+
+mdn-button::part(button):hover {
+  background-color: transparent;
+  border: 1px solid var(--color-text-purple);
+}
+
+mdn-button::part(icon) {
+  color: var(--color-text-purple);
+}
+
+summary {
+  color: var(--color-text-purple);
+  cursor: pointer;
+}
+
+a {
+  color: var(--color-text-purple);
+
+  &:hover {
+    text-decoration: none;
+  }
+}
+
+iframe {
+  width: 100%;
+  height: 500px;
+
+  overflow: hidden;
+
+  border: none;
+  border-radius: 0.5rem;
+}
+
+footer {
+  font-size: var(--font-size-small);
+  font-style: italic;
+}

@@ -1,0 +1,73 @@
+.generic-sidebar {
+  --color-accent: var(--color-blue-50);
+  --color-background-accent: var(--color-background-blue);
+  margin-bottom: 2rem;
+
+  .generic-sidebar__header {
+    h2 {
+      padding: 0.75em 0;
+      margin: 0;
+
+      font-size: var(--font-size-large);
+      font-weight: var(--font-weight-normal);
+
+      line-height: 1.2;
+
+      letter-spacing: 1.5px;
+    }
+  }
+
+  .generic-sidebar__list {
+    padding: 0;
+    margin: 0;
+    list-style: none;
+  }
+
+  .generic-sidebar__item {
+    margin: 0;
+
+    &:not(:last-child) {
+      margin-bottom: 0.5rem;
+    }
+  }
+
+  .generic-sidebar__link {
+    display: inline-block;
+    padding: 0.25em 0.5em;
+    color: var(--color-text-primary);
+
+    &:hover {
+      color: var(--color-area-link);
+    }
+
+    &:not(:hover) {
+      text-decoration: none;
+    }
+
+    &[aria-current="true"] {
+      background-color: var(--color-background-accent);
+      border-left: 2px solid var(--color-accent);
+    }
+  }
+
+  em {
+    align-items: baseline;
+
+    padding: 0.25em 0;
+
+    font-style: normal;
+
+    background-color: var(--color-background-accent);
+    border-left: 2px solid var(--color-accent);
+  }
+}
+
+.generic-sidebar--plus {
+  --color-accent: var(--color-text-red);
+  --color-background-accent: var(--color-background-red);
+}
+
+.generic-sidebar--observatory {
+  --color-accent: var(--color-text-purple);
+  --color-background-accent: var(--color-background-purple);
+}

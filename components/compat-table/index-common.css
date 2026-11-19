@@ -1,0 +1,539 @@
+/* Compat (mobile *and* desktop). */
+
+.table-container {
+  overflow-x: hidden;
+}
+
+table {
+  display: grid;
+  grid-auto-flow: row dense;
+
+  thead {
+    tr {
+      display: contents;
+
+      th,
+      td {
+        display: grid;
+        grid-template-columns: subgrid;
+      }
+    }
+  }
+
+  tbody {
+    display: contents;
+
+    tr {
+      display: contents;
+
+      th,
+      td {
+        display: contents;
+
+        button {
+          display: grid;
+          grid-template-columns: subgrid;
+        }
+
+        .timeline {
+          display: grid;
+          grid-template-columns: subgrid;
+          grid-column: 1 / -1;
+        }
+      }
+    }
+  }
+}
+
+.bc-toolbar {
+  display: flex;
+
+  flex-wrap: wrap;
+
+  gap: 0.5rem;
+
+  align-items: center;
+  justify-content: space-between;
+}
+
+.bc-on-github {
+  font-size: var(--font-size-small);
+}
+
+.bc-no-browsers {
+  padding: 1rem;
+
+  font-size: var(--font-size-small);
+
+  border: 1px solid var(--color-border-primary);
+  border-radius: 0.25rem;
+}
+
+.bc-table {
+  /* Keep small browser selections narrow; the feature column fills the rest. */
+  --compat-browser-column-max: 4rem;
+
+  width: 100%;
+
+  margin: 0;
+
+  overflow-x: auto;
+
+  border-spacing: 0;
+  border-collapse: separate;
+
+  border: 1px solid var(--color-border-primary);
+  border-radius: 0.25rem;
+
+  td,
+  th {
+    padding: 0;
+    padding: 0.4rem;
+
+    font-size: var(--font-size-small);
+    font-weight: 500;
+
+    border: 1px solid var(--color-border-primary);
+    border-width: 0 0 1px 1px;
+
+    code {
+      font-size: var(--font-size-small);
+    }
+  }
+
+  th {
+    padding: 0.4rem;
+    vertical-align: bottom;
+    background: var(--color-background-primary);
+  }
+
+  thead {
+    line-height: var(--font-line-ui);
+    white-space: nowrap;
+  }
+
+  /*
+     * these props allow us to add border-radius to the table.
+     * border-collapse: separate gets in the way of this
+     * being easy.
+     */
+  tbody {
+    tr {
+      height: 3rem;
+
+      @media (--screen-small-and-wider) {
+        &:last-child {
+          th,
+          td {
+            border-bottom-width: 0;
+          }
+        }
+      }
+
+      th {
+        vertical-align: middle;
+        border-left-width: 0;
+      }
+    }
+
+    .bc-support {
+      vertical-align: top;
+
+      button {
+        width: 100%;
+        cursor: pointer;
+      }
+
+      &.bc-supports-no > button > span {
+        color: var(--color-text-red);
+      }
+
+      &.bc-supports-partial > button > span {
+        color: var(--color-text-yellow);
+      }
+
+      &.bc-supports-preview > button > span {
+        color: var(--color-text-blue);
+      }
+
+      &.bc-supports-yes > button > span {
+        color: var(--color-text-green);
+      }
+    }
+  }
+
+  .bc-supports {
+    margin-bottom: 1rem;
+
+    .icon-wrap {
+      padding-bottom: 2px;
+      background: var(--color-background-page);
+    }
+  }
+
+  .bc-supports.bc-supports-removed-partial {
+    .bcd-cell-text-copy {
+      color: var(--color-text-yellow);
+    }
+  }
+
+  .icon-wrap {
+    .bc-support-level {
+      position: absolute !important;
+
+      width: 1px !important;
+      height: 1px !important;
+
+      padding: 0 !important;
+      margin: -1px !important;
+
+      overflow: hidden !important;
+
+      white-space: nowrap !important;
+
+      /* visually-hidden */
+      border: 0 !important;
+
+      clip-path: inset(50%) !important;
+    }
+  }
+
+  .bc-support {
+    > button > .icon-wrap {
+      display: block;
+    }
+
+    .icon.icon-removed-partial {
+      background-color: var(--color-text-red);
+
+      /* override icon */
+      mask-image: url("../icon/circle-x.svg");
+    }
+
+    .timeline .icon.icon-removed-partial {
+      background-color: var(--color-text-yellow);
+      mask-image: url("../icon/circle-slash.svg");
+    }
+  }
+
+  .bc-support.bc-supports-removed-partial {
+    .bcd-cell-text-copy {
+      color: var(--color-text-red);
+    }
+  }
+
+  .bc-feature {
+    display: flex;
+
+    align-items: center;
+
+    width: 100%;
+
+    text-align: left;
+
+    border: none;
+    border-left: max(
+        0px,
+        calc((var(--compat-feature-depth, 1) - 1) * 8px - 1px)
+      )
+      solid var(--color-border-primary);
+
+    > * {
+      flex-basis: max-content;
+      border: none !important;
+    }
+  }
+}
+
+.bc-head-txt-label {
+  line-height: var(--font-line-ui);
+
+  white-space: nowrap;
+
+  writing-mode: vertical-rl;
+  text-orientation: sideways;
+
+  transform: rotate(180deg);
+}
+
+.bc-support {
+  vertical-align: middle;
+  text-align: center;
+}
+
+.bc-level-no {
+  background-color: var(--color-text-red);
+}
+
+.bc-level-partial {
+  background-color: var(--color-text-yellow);
+}
+
+.bc-level-preview {
+  background-color: var(--color-text-blue);
+}
+
+.bc-legend-items-container {
+  display: flex;
+
+  flex-wrap: wrap;
+
+  gap: 1.5rem;
+
+  margin-bottom: 2rem;
+
+  font-size: var(--font-size-small);
+}
+
+.bc-legend-tip {
+  margin-top: 0;
+  margin-bottom: 1rem;
+
+  font-size: var(--font-size-small);
+  font-variation-settings: "slnt" -10;
+  font-style: italic;
+}
+
+@media print {
+  .bc-legend-tip {
+    display: none !important;
+  }
+}
+
+.bc-legend-item {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+}
+
+.bc-legend-item-dt {
+  display: flex;
+
+  .icon {
+    background-color: var(--color-border-secondary);
+  }
+}
+
+/* Row with desktop / mobile icons. */
+.bc-platforms {
+  th {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  td {
+    border: none;
+  }
+}
+
+/* Row with browser names. */
+.bc-browsers {
+  th {
+    display: flex;
+
+    flex-direction: column;
+
+    gap: 0.25rem;
+
+    align-items: center;
+    justify-content: end;
+
+    vertical-align: bottom;
+  }
+
+  td {
+    border-width: 0 0 1px;
+  }
+}
+
+.bc-notes-list {
+  /* Skip the feature-name column so the box aligns with the browser columns. */
+  grid-column: 2 / -1;
+
+  margin: 0;
+
+  text-align: left;
+
+  border-left: 1px solid var(--color-border-primary);
+
+  /* Each branch renders as a cell-like box. The surrounding table cell
+     already provides the outer borders, so each branch only draws a
+     top separator when stacked under another branch. */
+  .bc-branch {
+    position: relative;
+    padding: 0.75rem 1rem;
+  }
+
+  .bc-branch + .bc-branch {
+    border-top: 1px solid var(--color-border-primary);
+  }
+
+  .bc-branch-heading {
+    display: flex;
+
+    gap: 0.375rem;
+
+    align-items: center;
+
+    margin-bottom: 0.75rem;
+
+    font-weight: var(--font-body-strong-weight);
+
+    color: var(--color-text-primary);
+  }
+
+  /* Each branch carries its own timeline line, spanning from its first
+     to its last icon, so versions stay chronological within the branch.
+     `--compat-timeline-cap` is the gap the cap pseudo carves out below
+     the last icon — kept in one place so both rules stay in sync. */
+  --compat-timeline-cap: 4px;
+
+  .bc-branch-items {
+    position: relative;
+
+    &::before {
+      position: absolute;
+      top: 0;
+      bottom: var(--compat-timeline-cap);
+      left: 7px;
+      z-index: -1;
+
+      width: 3px;
+
+      margin-top: 0.25rem;
+
+      content: "";
+
+      background: var(--color-border-primary);
+    }
+  }
+
+  .bc-branch-items .bc-notes-wrapper:last-child > :last-child {
+    position: relative;
+
+    &::before {
+      position: absolute;
+      top: var(--compat-timeline-cap);
+      bottom: 0;
+      left: 7px;
+      z-index: -1;
+
+      width: 3px;
+
+      content: "";
+
+      background: var(--color-background-page);
+    }
+  }
+
+  .bc-level-yes.icon.icon-yes {
+    /* override icon */
+    background-color: var(--color-text-green);
+    mask-image: url("../icon/circle-check.svg");
+  }
+
+  .bc-supports-dd {
+    padding-left: 1.5rem;
+    margin-bottom: 1rem;
+    text-indent: -1.5rem;
+
+    &:last-child {
+      margin-bottom: 0;
+    }
+
+    .icon {
+      background-color: var(--color-text-secondary);
+      mask-image: url("../icon/circle.svg");
+    }
+
+    .icon-wrap {
+      padding-bottom: 2px;
+      background-color: var(--color-background-page);
+    }
+  }
+
+  .bc-notes-end {
+    margin-bottom: 2rem;
+  }
+
+  .bc-version-label {
+    display: inline;
+  }
+
+  abbr {
+    margin-right: 4px;
+    text-decoration: none;
+  }
+}
+
+.bc-notes-wrapper {
+  margin-bottom: 1rem;
+  color: var(--color-border-secondary);
+
+  &:last-child {
+    margin-bottom: 0;
+  }
+}
+
+.only-icon span {
+  position: absolute !important;
+
+  width: 1px !important;
+  height: 1px !important;
+
+  padding: 0 !important;
+  margin: -1px !important;
+
+  overflow: hidden !important;
+
+  white-space: nowrap !important;
+
+  /* visually-hidden */
+  border: 0 !important;
+
+  clip-path: inset(50%) !important;
+}
+
+.bc-table-row-header {
+  width: 100%;
+  padding: 0.25em;
+  text-align: left;
+
+  code {
+    overflow: hidden;
+  }
+
+  .bc-icons {
+    display: inline-flex;
+
+    gap: 0.5ch;
+
+    margin-left: 0.5ch;
+
+    vertical-align: text-top;
+
+    .icon {
+      background-color: var(--color-text-secondary);
+    }
+  }
+}
+
+.bc-github-link {
+  font-size: var(--font-size-small);
+}
+
+.main-page-content {
+  .bc-legend {
+    dd,
+    dt {
+      margin-top: 0;
+      margin-bottom: 0;
+      margin-left: 0;
+    }
+  }
+
+  .bc-supports-dd {
+    margin: 0;
+  }
+}

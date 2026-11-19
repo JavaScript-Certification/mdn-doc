@@ -1,0 +1,60 @@
+.breadcrumbs {
+  display: flex;
+
+  align-items: center;
+  justify-content: end;
+
+  min-width: 0;
+
+  padding: 2px;
+  margin: 0;
+  margin-right: auto;
+
+  overflow-x: hidden;
+
+  list-style: none;
+
+  li {
+    display: flex;
+    place-items: center;
+
+    a {
+      color: var(--color-text-primary);
+
+      &:not(:hover) {
+        text-decoration: none;
+      }
+    }
+
+    &:not(:last-child)::after {
+      width: 1.25rem;
+      height: 1.25rem;
+
+      margin-inline: 0.25rem;
+
+      vertical-align: middle;
+
+      content: "";
+
+      background-color: var(--color-text-secondary);
+
+      mask-image: url("../icon/chevron-right.svg");
+      mask-size: cover;
+    }
+  }
+
+  @media (--screen-small-and-narrower) {
+    @media (hover: hover) {
+      /* Hide grand-parents on hover devices. */
+      li:not(:nth-last-child(-n + 2)) {
+        display: none;
+      }
+    }
+
+    @media (hover: none) {
+      justify-content: normal;
+      overflow-x: auto;
+      scrollbar-color: transparent transparent;
+    }
+  }
+}

@@ -1,0 +1,29 @@
+@import url("../layout/2-sidebars.css");
+
+.curriculum-content-container {
+  .curriculum-layout__body {
+    padding-bottom: 3rem;
+  }
+
+  .curriculum-layout__sidebar {
+    padding-top: 0;
+  }
+
+  .curriculum-layout__toc {
+    display: flex;
+
+    flex-wrap: wrap;
+
+    gap: 0.5rem;
+
+    align-content: start;
+    align-items: start;
+    justify-content: space-between;
+  }
+
+  @media (--screen-layout-no-sidebar) {
+    .curriculum-layout__toc {
+      --toc-header-font-size: var(--font-size-larger);
+    }
+  }
+}

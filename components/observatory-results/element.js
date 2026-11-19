@@ -1,0 +1,176 @@
+import { Task } from "@lit/task";
+import { LitElement, html } from "lit";
+import { nothing } from "lit";
+
+import { gleanClick } from "../../utils/glean.js";
+import { OBSERVATORY_API_URL } from "../env/index.js";
+
+import styles from "./element.css?lit";
+import printStyles from "./print.css?lit";
+import { Rating } from "./rating.js";
+import { Tabs } from "./tabs.js";
+
+import "../../components/progress-bar/element.js";
+import "../../components/observatory-comparison-table/element.js";
+import "../../components/observatory-human-duration/element.js";
+
+export class MDNObservatoryResults extends LitElement {
+  static styles = [styles, printStyles];
+
+  constructor() {
+    super();
+    /** @type { string | null } */
+    this.host = null;
+    /** @type { number } */
+    this.selectedTab = 0;
+    /** @type { boolean } */
+    this._usePostInApi = false;
+  }
+
+  /**
+   * @type { import("@lit").PropertyDeclarations }
+   */
+  static get properties() {
+    return {
+      host: { type: String },
+      selectedTab: { state: true, type: Number },
+      _usePostInApi: { state: true, type: Boolean },
+    };
+  }
+
+  _apiTask = new Task(this, {
+    args: () => [this.host],
+    task: async ([host], { signal }) => {
+      if (!host) {
+        throw new Error("No host provided");
+      }
+      try {
+        const res = await fetch(
+          `${OBSERVATORY_API_URL}/api/v2/analyze?host=${encodeURIComponent(
+            host,
+          )}`,
+          { signal, method: this._usePostInApi ? "POST" : "GET" },
+        );
+        if (!res.ok) {
+          let message = `${res.status}: ${res.statusText}`;
+          try {
+            const data = await res.json();
+            if (data.error) {
+              message = data.message;
+            }
+          } catch {
+            // Ignore.
+          }
+          throw new Error(message);
+        }
+        return await res.json();
+      } catch (error) {
+        const message = "Observatory API request for scan data failed";
+        gleanClick(`observatory: error -> ${message}`);
+        throw new Error(message, {
+          cause: error,
+        });
+      }
+    },
+  });
+
+  connectedCallback() {
+    super.connectedCallback();
+    this._updateSelectedTab = this._updateSelectedTab.bind(this);
+    this.selectedTab = this._getSelectedTab();
+    globalThis.addEventListener("hashchange", this._updateSelectedTab);
+  }
+
+  disconnectedCallback() {
+    super.disconnectedCallback();
+    globalThis.removeEventListener("hashchange", this._updateSelectedTab);
+  }
+
+  firstUpdated() {
+    const params = new URLSearchParams(globalThis.location.search);
+    this.host = params.get("host");
+  }
+
+  _updateSelectedTab() {
+    this.selectedTab = this._getSelectedTab();
+  }
+
+  /**
+   * @returns {number}
+   */
+  _getSelectedTab() {
+    const hash = globalThis.location.hash.replace("#", "");
+    const tabs = [
+      "scoring",
+      "csp",
+      "cookies",
+      "headers",
+      "history",
+      "benchmark",
+    ];
+    const index = tabs.indexOf(hash);
+    return index === -1 ? 0 : index;
+  }
+
+  /**
+   *
+   * @param {Event} e
+   */
+  async _rescan(e) {
+    e.preventDefault();
+    if (!this.host) {
+      return;
+    }
+    gleanClick("observatory: rescan");
+    this._usePostInApi = true;
+    this._apiTask.run();
+  }
+
+  /**
+   *
+   * @param {number} index
+   * @param {string} key
+   */
+  _handleTabSelect(index, key) {
+    this.selectedTab = index;
+    gleanClick(`observatory: tab -> ${key}`);
+    globalThis.history.replaceState(
+      "",
+      "",
+      globalThis.location.pathname + globalThis.location.search + "#" + key,
+    );
+  }
+
+  render() {
+    if (!this.host) {
+      return nothing;
+    }
+    return this._apiTask.render({
+      pending: () =>
+        html` <label class="visually-hidden" for="progress-bar">
+            Rescanning ${this.host} </label
+          ><mdn-progress-bar id="progress-bar"></mdn-progress-bar>`,
+
+      complete: (data) => html`
+        <section class="summary">
+          ${Rating({
+            result: data,
+            host: this.host || "",
+            rescan: this._rescan,
+          })}
+        </section>
+        <section class="results">
+          ${Tabs({
+            result: data,
+            selectedTab: this.selectedTab,
+            onTabSelect: (index, key) => this._handleTabSelect(index, key),
+          })}
+        </section>
+      </div>`,
+
+      error: (e) => html`<div class="error">${e}</div>`,
+    });
+  }
+}
+
+customElements.define("mdn-observatory-results", MDNObservatoryResults);

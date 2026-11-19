@@ -1,0 +1,36 @@
+/* Global */
+
+*,
+::before,
+::after {
+  box-sizing: border-box;
+}
+
+input,
+button,
+textarea,
+select {
+  font: inherit;
+}
+
+button {
+  color: inherit;
+  cursor: pointer;
+}
+
+img {
+  max-width: 100%;
+  height: auto;
+}
+
+a {
+  color: var(--color-link-normal);
+}
+
+[hidden] {
+  display: none !important;
+}
+
+#content {
+  scroll-margin-block-start: var(--sticky-header-height);
+}

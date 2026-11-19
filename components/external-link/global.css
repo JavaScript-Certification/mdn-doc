@@ -1,0 +1,26 @@
+.external {
+  position: relative;
+  padding-right: 1.125em;
+
+  &::after {
+    position: absolute;
+
+    width: 1em;
+    height: 1em;
+
+    margin-left: 0.125em;
+
+    /*
+      Unicode zero width space as `<content replacement>` to expose the alt text in the a11y tree.
+      See: https://bugzilla.mozilla.org/show_bug.cgi?id=1976574
+    */
+    content: "\200b" / " (external)";
+
+    background-color: currentcolor;
+
+    mask-image: url("../icon/external-link.svg");
+    mask-size: cover;
+
+    transform: translateY(calc(1lh / 2 - 0.5em));
+  }
+}

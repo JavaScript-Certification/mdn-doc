@@ -1,0 +1,46 @@
+.reference-toc {
+  h2 {
+    padding: 0.75em 0;
+    margin: 0;
+
+    font-size: var(--toc-header-font-size, var(--font-size-large));
+    font-weight: normal;
+  }
+
+  ul {
+    display: grid;
+
+    padding: 0;
+    margin: 0;
+
+    list-style: none;
+
+    ul {
+      padding-left: 1em;
+    }
+  }
+
+  a {
+    display: inline-block;
+
+    padding: 0.25em 0.5em; /* Keep in sync with `.left-sidebar em` */
+    margin-left: 2px; /* for box-shadow */
+
+    color: inherit;
+
+    box-shadow: -2px 0 0 var(--color-border-primary);
+
+    &:not(:hover) {
+      text-decoration: none;
+    }
+
+    &:hover:not([aria-current="true"]) {
+      color: var(--color-link-normal);
+    }
+
+    &[aria-current="true"] {
+      background-color: var(--color-area-background);
+      box-shadow: -2px 0 0 var(--color-area-highlight-border);
+    }
+  }
+}

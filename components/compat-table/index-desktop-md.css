@@ -1,0 +1,26 @@
+/* Compat (desktop-md) */
+
+@media (--screen-medium-and-wider) {
+  .bc-on-github {
+    text-align: right;
+  }
+
+  .bc-table {
+    /* 25% for feature, up to 75% for browser columns. */
+    grid-template-columns: minmax(25%, 1fr) repeat(
+        var(--compat-table-browser-count),
+        minmax(
+          0,
+          min(
+            calc(75% / var(--compat-table-browser-count)),
+            var(--compat-browser-column-max)
+          )
+        )
+      );
+  }
+
+  .icon {
+    /* Workaround for Icons being cut by 1px at the top. */
+    --size: calc(1rem + 1px);
+  }
+}

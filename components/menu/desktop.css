@@ -1,0 +1,112 @@
+/* Desktop */
+
+@media (--screen-menu-full) {
+  .menu {
+    --menu-button-padding: 0.5rem 0.7rem;
+
+    position: relative;
+    display: flex;
+    align-items: center;
+  }
+
+  /* Button */
+
+  .menu__tab-button {
+    display: flex;
+
+    column-gap: 0.125rem;
+
+    align-items: center;
+
+    padding: var(--menu-button-padding);
+
+    border: 1px solid transparent;
+    border-bottom: none;
+
+    &[aria-expanded="true"] {
+      position: relative;
+      z-index: 1;
+    }
+
+    /* Arrow */
+
+    &::after {
+      margin-right: -4px;
+    }
+  }
+
+  /* Link */
+
+  .menu__tab-link {
+    padding: var(--menu-button-padding);
+  }
+
+  /* Label */
+
+  .menu__tab-label {
+    &[data-type="short"] {
+      display: none;
+    }
+
+    @media (--screen-menu-compact) {
+      &[data-type="long"] {
+        display: none;
+      }
+
+      &[data-type="short"] {
+        display: block;
+      }
+    }
+  }
+
+  /* Panel */
+
+  .menu__panel {
+    position: absolute;
+    right: 0;
+    left: 0;
+    z-index: 1; /* prevents menu foldout to be drawn below language chooser */
+
+    margin-top: -1px;
+
+    background-color: var(--color-background-page);
+    border: 1px solid var(--color-border-primary);
+  }
+
+  /* Title */
+
+  .menu__panel-title {
+    color: var(--menu-tab-text);
+    background-color: var(--menu-tab-background);
+  }
+
+  /* Content */
+
+  .menu__panel-content {
+    grid-template-columns: repeat(3, 1fr);
+  }
+
+  /* HTML CSS */
+  .menu__tab[data-section="html"],
+  .menu__tab[data-section="css"] {
+    dl:nth-of-type(2) {
+      border-right: 1px solid var(--color-border-primary);
+    }
+  }
+
+  /* Learn */
+  .menu__tab[data-section="learn"] {
+    .menu__panel-content dl:nth-of-type(1) {
+      grid-column: span 3;
+      padding-bottom: 1.4rem;
+      border-bottom: 1px solid var(--color-border-primary);
+    }
+  }
+
+  /* About */
+  .menu__tab[data-section="about"] {
+    .menu__panel-content ul {
+      row-gap: 1.4rem;
+    }
+  }
+}

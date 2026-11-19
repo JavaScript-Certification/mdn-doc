@@ -1,0 +1,52 @@
+@import url("../layout/2-sidebars.css");
+
+/* Reference Layout */
+
+.reference-layout {
+  .reference-layout__header {
+    h1 {
+      margin: 1rem 0;
+
+      font-size: var(--font-size-largest);
+      font-weight: normal;
+
+      line-height: var(--font-line-header);
+
+      code {
+        font-family: inherit;
+      }
+
+      code:first-of-type {
+        padding: 0.0625em 0.125em;
+        background-color: var(--color-background-secondary);
+        border-radius: var(--radius-normal);
+      }
+    }
+  }
+
+  .reference-layout__body {
+    padding-bottom: 3rem;
+  }
+
+  .reference-layout__toc {
+    display: flex;
+
+    flex-wrap: wrap;
+
+    gap: 0.5rem;
+
+    align-content: start;
+    align-items: start;
+    justify-content: space-between;
+  }
+
+  @media (--screen-layout-no-sidebar) {
+    .reference-layout__toc {
+      --toc-header-font-size: var(--font-size-larger);
+    }
+  }
+
+  mdn-survey {
+    margin-top: 0.5rem;
+  }
+}
