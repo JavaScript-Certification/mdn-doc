@@ -1,3 +1,5 @@
+> **Production:** https://mdn-docs-production.netlify.app — `.github/workflows/production.yaml` deploys `main` to Netlify. in the certificates.dev exam docs drawer. the MDN docs shown
+
 # Fred
 
 MDN's next fr(ont)e(n)d.
